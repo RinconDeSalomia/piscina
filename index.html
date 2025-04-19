@@ -214,7 +214,139 @@
         } else alert('Credenciales incorrectas.');
       });
 
-      // Resto de lógica (morosos, registro, reservas, etc.) permanece igual...
+      // Guardar morosos
+      document.getElementById('save-morosos').onclick = () => {
+        const list = document.getElementById('morosos-input').value.split(',').map(s=>s.trim().toUpperCase()).filter(s=>s);
+        localStorage.setItem('morosos', JSON.stringify(list)); alert('Lista de morosos actualizada.');
+      };
+
+      // Admin reservas
+      document.getElementById('view-reservas').onclick = viewAdminReservas;
+      document.getElementById('download-reservas').onclick = downloadReservas;
+
+      // Mostrar reglamento en reserva
+      btnVerReg.addEventListener('click', () => {
+        resForm.classList.add('hidden'); reglamentoDiv.classList.remove('hidden');
+      });
+      closeReg.addEventListener('click', () => {
+        reglamentoDiv.classList.add('hidden'); resForm.classList.remove('hidden');
+      });
+
+      // Generar apartamentos
+      document.getElementById('torre').addEventListener('change', function() {
+        const t=this.value; const apt=document.getElementById('apartamento'); apt.innerHTML='<option value="">-- Selecciona apto --</option>';
+        if(!t) return; const max=t==='K'?2:4; for(let p=1;p<=5;p++) for(let u=1;u<=max;u++){ const num=`${t}${p}${String(u).padStart(2,'0')}`;
+          const opt=document.createElement('option'); opt.value=num; opt.text=num; apt.appendChild(opt);
+        }
+      });
+
+      // Validación
+      function validate(form) {
+        let ok=true; 
+        form.querySelectorAll('.field').forEach(div=>{ 
+          const inp=div.querySelector('input,select'); 
+          const err=div.querySelector('.error-msg');
+          if(!inp.checkValidity()){ 
+            div.classList.add('error'); 
+            err.style.visibility='visible'; 
+            ok=false; 
+          } else { 
+            div.classList.remove('error'); 
+            err.style.visibility='hidden'; 
+          }
+        }); 
+        
+        // Validación específica para checkbox de política
+        if(form.id === 'form-registro' && !aceptoPolitica.checked) {
+          politicaError.style.visibility = 'visible';
+          aceptoPolitica.parentElement.classList.add('error');
+          ok = false;
+        } else {
+          politicaError.style.visibility = 'hidden';
+          aceptoPolitica.parentElement.classList.remove('error');
+        }
+        
+        return ok;
+      }
+
+      // Registro Residente
+      regForm.addEventListener('submit', e=>{
+        e.preventDefault(); 
+        if(!validate(regForm)) return;
+        
+        const nombre=document.getElementById('nombre').value;
+        const apartamento=document.getElementById('apartamento').value; 
+        currentApartamento=apartamento;
+        
+        const morosos=JSON.parse(localStorage.getItem('morosos')||'[]'); 
+        if(morosos.includes(apartamento)){ 
+          alert('No puedes reservar: estás en lista de morosos.'); 
+          return; 
+        }
+        
+        regForm.classList.add('hidden'); 
+        showMisReservas(apartamento); 
+        resForm.classList.remove('hidden');
+        localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
+      });
+
+      // Mostrar política de datos al hacer clic en el enlace
+      politicaLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert(`POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES\n\nConforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia, el Conjunto Residencial Rincon de Salomia informa que los datos personales recolectados serán utilizados exclusivamente para:\n\n1. Gestión de reservas y acceso a zonas comunes\n2. Comunicación con residentes\n3. Cumplimiento de obligaciones legales\n\nLos datos no serán compartidos con terceros sin autorización previa. Puede ejercer sus derechos de acceso, corrección, actualización o supresión de datos contactando a la administración.`);
+      });
+
+      // Mostrar mis reservas
+      function showMisReservas(apto){ 
+        const all=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const filt=all.filter(r=>r.apartamento===apto);
+        if(!filt.length) misReservasList.innerHTML='<p>No tienes reservas previas.</p>'; else{
+          let html='<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          filt.forEach(r=> html+=`<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          misReservasList.innerHTML=html+'</tbody></table>';
+        } 
+        misReservasDiv.classList.remove('hidden'); 
+      }
+      
+      closeMis.addEventListener('click', ()=> misReservasDiv.classList.add('hidden'));
+
+      // Reserva Piscina
+      resForm.addEventListener('submit', e=>{
+        e.preventDefault(); 
+        if(!validate(resForm)) return;
+        const reserva=JSON.parse(localStorage.getItem('currentReserva')||'{}');
+        reserva.fecha=document.getElementById('fecha').value;
+        reserva.hora=document.getElementById('hora').value;
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); reservas.push(reserva);
+        localStorage.setItem('reservas', JSON.stringify(reservas));
+        successBox.textContent=`¡Reserva confirmada! ${reserva.fecha} ${reserva.hora}`;
+        successBox.style.display='block'; setTimeout(()=>location.reload(),3000);
+      });
+
+      // Admin ver/download reservas
+      function viewAdminReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const c=document.getElementById('reservas-list');
+        if(!reservas.length) c.innerHTML='<p>No hay reservas.</p>'; else{ 
+          let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          reservas.forEach(r=> html+=`<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          c.innerHTML=html+'</tbody></table>'; 
+        } 
+        c.classList.remove('hidden'); 
+      }
+      
+      function downloadReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        let csv='Nombre,Apto,Fecha,Hora\n';
+        reservas.forEach(r=> csv+=`${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
+        const blob=new Blob([csv],{type:'text/csv'}); 
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); 
+        a.href=url; 
+        a.download='reservas_piscina.csv'; 
+        a.click(); 
+        URL.revokeObjectURL(url);
+      }
     });
   </script>
 </body>
