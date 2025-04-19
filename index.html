@@ -30,6 +30,11 @@
     th { background:var(--bg); }
     .reglamento-list { text-align:left; margin-top:1rem; max-height:200px; overflow-y:auto; }
     .reglamento-list li { margin-bottom:0.5rem; }
+    .checkbox-container { display:flex; align-items:flex-start; margin:1rem 0; }
+    .checkbox-container input { width:auto; margin-right:0.5rem; margin-top:0.25rem; }
+    .checkbox-container label { margin:0; font-size:0.85rem; }
+    .checkbox-container a { color:var(--primary); text-decoration:none; }
+    .checkbox-container a:hover { text-decoration:underline; }
   </style>
 </head>
 <body>
@@ -96,6 +101,16 @@
         </select>
         <div class="error-msg">Selecciona apartamento.</div>
       </div>
+      
+      <!-- Checkbox de aceptación de política de datos -->
+      <div class="checkbox-container">
+        <input type="checkbox" id="acepto-politica" required />
+        <label for="acepto-politica">
+          Acepto la <a href="#" id="politica-link">Política de Tratamiento de Datos Personales</a> conforme a la Ley 1581 de 2012 y Decreto 1377 de 2013 de Colombia.
+        </label>
+      </div>
+      <div class="error-msg" id="politica-error">Debes aceptar la política de tratamiento de datos.</div>
+      
       <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
     </form>
 
@@ -169,6 +184,9 @@
       const closeReg = document.getElementById('close-reglamento');
       const btnVerReg = document.getElementById('btn-ver-reglamento');
       const successBox = document.getElementById('success');
+      const aceptoPolitica = document.getElementById('acepto-politica');
+      const politicaError = document.getElementById('politica-error');
+      const politicaLink = document.getElementById('politica-link');
       let currentApartamento = '';
 
       // Elección de rol
@@ -213,33 +231,78 @@
 
       // Validación
       function validate(form) {
-        let ok=true; form.querySelectorAll('.field').forEach(div=>{ const inp=div.querySelector('input,select'); const err=div.querySelector('.error-msg');
-          if(!inp.checkValidity()){ div.classList.add('error'); err.style.visibility='visible'; ok=false; } else { div.classList.remove('error'); err.style.visibility='hidden'; }
-        }); return ok;
+        let ok=true; 
+        form.querySelectorAll('.field').forEach(div=>{ 
+          const inp=div.querySelector('input,select'); 
+          const err=div.querySelector('.error-msg');
+          if(!inp.checkValidity()){ 
+            div.classList.add('error'); 
+            err.style.visibility='visible'; 
+            ok=false; 
+          } else { 
+            div.classList.remove('error'); 
+            err.style.visibility='hidden'; 
+          }
+        }); 
+        
+        // Validación específica para checkbox de política
+        if(form.id === 'form-registro' && !aceptoPolitica.checked) {
+          politicaError.style.visibility = 'visible';
+          aceptoPolitica.parentElement.classList.add('error');
+          ok = false;
+        } else {
+          politicaError.style.visibility = 'hidden';
+          aceptoPolitica.parentElement.classList.remove('error');
+        }
+        
+        return ok;
       }
 
       // Registro Residente
       regForm.addEventListener('submit', e=>{
-        e.preventDefault(); if(!validate(regForm)) return;
+        e.preventDefault(); 
+        if(!validate(regForm)) return;
+        
         const nombre=document.getElementById('nombre').value;
-        const apartamento=document.getElementById('apartamento').value; currentApartamento=apartamento;
-        const morosos=JSON.parse(localStorage.getItem('morosos')||'[]'); if(morosos.includes(apartamento)){ alert('No puedes reservar: estás en lista de morosos.'); return; }
-        regForm.classList.add('hidden'); showMisReservas(apartamento); resForm.classList.remove('hidden');
+        const apartamento=document.getElementById('apartamento').value; 
+        currentApartamento=apartamento;
+        
+        const morosos=JSON.parse(localStorage.getItem('morosos')||'[]'); 
+        if(morosos.includes(apartamento)){ 
+          alert('No puedes reservar: estás en lista de morosos.'); 
+          return; 
+        }
+        
+        regForm.classList.add('hidden'); 
+        showMisReservas(apartamento); 
+        resForm.classList.remove('hidden');
         localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
       });
 
+      // Mostrar política de datos al hacer clic en el enlace
+      politicaLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert(`POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES\n\nConforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia, el Conjunto Residencial Rincon de Salomia informa que los datos personales recolectados serán utilizados exclusivamente para:\n\n1. Gestión de reservas y acceso a zonas comunes\n2. Comunicación con residentes\n3. Cumplimiento de obligaciones legales\n\nLos datos no serán compartidos con terceros sin autorización previa. Puede ejercer sus derechos de acceso, corrección, actualización o supresión de datos contactando a la administración.`);
+      });
+
       // Mostrar mis reservas
-      function showMisReservas(apto){ const all=JSON.parse(localStorage.getItem('reservas')||'[]'); const filt=all.filter(r=>r.apartamento===apto);
+      function showMisReservas(apto){ 
+        const all=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const filt=all.filter(r=>r.apartamento===apto);
         if(!filt.length) misReservasList.innerHTML='<p>No tienes reservas previas.</p>'; else{
           let html='<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
           filt.forEach(r=> html+=`<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
           misReservasList.innerHTML=html+'</tbody></table>';
-        } misReservasDiv.classList.remove('hidden'); }
+        } 
+        misReservasDiv.classList.remove('hidden'); 
+      }
+      
       closeMis.addEventListener('click', ()=> misReservasDiv.classList.add('hidden'));
 
       // Reserva Piscina
       resForm.addEventListener('submit', e=>{
-        e.preventDefault(); if(!validate(resForm)) return;
+        e.preventDefault(); 
+        if(!validate(resForm)) return;
         const reserva=JSON.parse(localStorage.getItem('currentReserva')||'{}');
         reserva.fecha=document.getElementById('fecha').value;
         reserva.hora=document.getElementById('hora').value;
@@ -250,15 +313,28 @@
       });
 
       // Admin ver/download reservas
-      function viewAdminReservas(){ const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); const c=document.getElementById('reservas-list');
-        if(!reservas.length) c.innerHTML='<p>No hay reservas.</p>'; else{ let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+      function viewAdminReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const c=document.getElementById('reservas-list');
+        if(!reservas.length) c.innerHTML='<p>No hay reservas.</p>'; else{ 
+          let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
           reservas.forEach(r=> html+=`<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
-          c.innerHTML=html+'</tbody></table>'; }
-        c.classList.remove('hidden'); }
-      function downloadReservas(){ const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); let csv='Nombre,Apto,Fecha,Hora\n';
+          c.innerHTML=html+'</tbody></table>'; 
+        } 
+        c.classList.remove('hidden'); 
+      }
+      
+      function downloadReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        let csv='Nombre,Apto,Fecha,Hora\n';
         reservas.forEach(r=> csv+=`${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
-        const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=url; a.download='reservas_piscina.csv'; a.click(); URL.revokeObjectURL(url);
+        const blob=new Blob([csv],{type:'text/csv'}); 
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); 
+        a.href=url; 
+        a.download='reservas_piscina.csv'; 
+        a.click(); 
+        URL.revokeObjectURL(url);
       }
     });
   </script>
