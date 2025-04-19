@@ -7,31 +7,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    :root {
-      --primary: #006d77;
-      --primary-dark: #005a63;
-      --bg: #edf6f9;
-      --white: #fff;
-      --error: #e63946;
-      --success: #2a9d8f;
-    }
-    * { box-sizing: border-box; }
+    :root { --primary:#006d77; --primary-dark:#005a63; --bg:#edf6f9; --white:#fff; --error:#e63946; --success:#2a9d8f; }
+    * { box-sizing:border-box; }
     body { margin:0; padding:0; font-family:'Roboto',sans-serif; background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100vh; }
-    .container { background:var(--white); padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; transition: transform 0.3s ease; }
-    .container:focus-within { transform: scale(1.02); }
+    .container { background:var(--white); padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; transition:transform 0.3s ease; }
+    .container:focus-within { transform:scale(1.02); }
     h1 { margin-bottom:1rem; font-size:1.5rem; color:var(--primary); text-align:center; }
     label { display:block; margin:0.75rem 0 0.25rem; color:#333; font-weight:500; }
-    input, select, button { width:100%; font-size:1rem; }
-    input, select {
-      padding:0.5rem; border:1px solid #ccc; border-radius:8px; transition: border-color 0.3s;
-    }
-    input:focus, select:focus { border-color:var(--primary); outline:none; }
+    input, select, button, textarea { width:100%; font-size:1rem; }
+    input, select, textarea { padding:0.5rem; border:1px solid #ccc; border-radius:8px; transition:border-color 0.3s; }
+    input:focus, select:focus, textarea:focus { border-color:var(--primary); outline:none; }
     .error-msg { color:var(--error); font-size:0.85rem; height:1.2em; margin-top:0.2rem; visibility:hidden; }
     .error input, .error select { border-color:var(--error); }
     .success-msg { display:none; text-align:center; padding:1rem; border-radius:8px; background:var(--success); color:var(--white); margin-bottom:1rem; }
-    button {
-      margin-top:1.5rem; padding:0.75rem; border:none; border-radius:8px; background:var(--primary); color:var(--white); cursor:pointer; transition: background 0.3s, box-shadow 0.3s;
-    }
+    button { margin-top:1.5rem; padding:0.75rem; border:none; border-radius:8px; background:var(--primary); color:var(--white); cursor:pointer; transition:background 0.3s, box-shadow 0.3s; }
     button:hover { background:var(--primary-dark); box-shadow:0 2px 8px rgba(0,0,0,0.2); }
     .hidden { display:none; }
     .footer { margin-top:1rem; font-size:0.8rem; color:#666; text-align:center; }
@@ -39,40 +28,64 @@
 </head>
 <body>
   <div class="container">
-    <div id="success" class="success-msg"><i class="fas fa-check-circle"></i> ¡Operación exitosa!</div>
-    <!-- Registro -->
-    <form id="form-registro" novalidate>
+    <div id="success" class="success-msg"><i class="fas fa-check-circle"></i> Operación exitosa</div>
+
+    <!-- Elección de rol -->
+    <div id="choice">
+      <h1><i class="fas fa-users-cog"></i> Acceder como:</h1>
+      <button id="btn-residente"><i class="fas fa-user"></i> Residente</button>
+      <button id="btn-admin"><i class="fas fa-user-shield"></i> Administrador</button>
+    </div>
+
+    <!-- Login Admin -->
+    <form id="admin-login" class="hidden" novalidate>
+      <h1><i class="fas fa-user-shield"></i> Login Admin</h1>
+      <div class="field">
+        <label for="admin-user">Usuario:</label>
+        <input type="text" id="admin-user" required placeholder="administrador" />
+        <div class="error-msg">Usuario inválido.</div>
+      </div>
+      <div class="field">
+        <label for="admin-pass">Clave:</label>
+        <input type="password" id="admin-pass" required placeholder="*****" />
+        <div class="error-msg">Clave inválida.</div>
+      </div>
+      <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+    </form>
+
+    <!-- Panel Admin -->
+    <div id="admin-panel" class="hidden">
+      <h1><i class="fas fa-file-upload"></i> Lista Morosos</h1>
+      <p>Pega los apartamentos (ej: F101,F102) separados por comas:</p>
+      <textarea id="morosos-input" rows="4" placeholder="A101,B202,C303"></textarea>
+      <button id="save-morosos"><i class="fas fa-save"></i> Guardar Listado</button>
+      <div class="footer">Los morosos no podrán reservar.</div>
+    </div>
+
+    <!-- Registro Residente -->
+    <form id="form-registro" class="hidden" novalidate>
       <h1><i class="fas fa-user-edit"></i> Registro Usuario</h1>
       <div class="field">
         <label for="nombre">Nombre completo:</label>
         <input type="text" id="nombre" required placeholder="Ana Pérez" />
-        <div class="error-msg">Por favor ingresa tu nombre.</div>
+        <div class="error-msg">Ingresa tu nombre.</div>
       </div>
       <div class="field">
         <label for="torre">Torre:</label>
         <select id="torre" required>
-          <option value="">-- Seleccione torre --</option>
+          <option value="">-- Selecciona torre --</option>
           <option>A</option><option>B</option><option>C</option><option>D</option>
           <option>E</option><option>F</option><option>G</option><option>H</option>
           <option>I</option><option>J</option><option>K</option>
         </select>
-        <div class="error-msg">Selecciona una torre.</div>
+        <div class="error-msg">Selecciona torre.</div>
       </div>
       <div class="field">
         <label for="apartamento">Apartamento:</label>
         <select id="apartamento" required>
-          <option value="">-- Seleccione torre primero --</option>
+          <option value="">-- Selecciona torre primero --</option>
         </select>
-        <div class="error-msg">Selecciona un apartamento.</div>
-      </div>
-      <div class="field">
-        <label for="estado">Estado de cartera:</label>
-        <select id="estado" required>
-          <option value="">-- Seleccione --</option>
-          <option value="pazysalvo">Paz y salvo</option>
-          <option value="pendiente">Con saldos pendientes</option>
-        </select>
-        <div class="error-msg">Indica tu estado de cartera.</div>
+        <div class="error-msg">Selecciona apartamento.</div>
       </div>
       <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
     </form>
@@ -83,88 +96,88 @@
       <div class="field">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" required />
-        <div class="error-msg">Selecciona una fecha.</div>
+        <div class="error-msg">Selecciona fecha.</div>
       </div>
       <div class="field">
         <label for="hora">Hora:</label>
         <select id="hora" required>
-          <option value="">-- Seleccione hora --</option>
-          <option value="08:00-09:00">08:00 - 09:00</option>
-          <option value="09:00-10:00">09:00 - 10:00</option>
-          <option value="10:00-11:00">10:00 - 11:00</option>
-          <option value="11:00-12:00">11:00 - 12:00</option>
-          <option value="12:00-13:00">12:00 - 13:00</option>
-          <option value="13:00-14:00">13:00 - 14:00</option>
-          <option value="14:00-15:00">14:00 - 15:00</option>
-          <option value="15:00-16:00">15:00 - 16:00</option>
-          <option value="16:00-17:00">16:00 - 17:00</option>
-          <option value="17:00-18:00">17:00 - 18:00</option>
-          <option value="18:00-19:00">18:00 - 19:00</option>
-          <option value="19:00-20:00">19:00 - 20:00</option>
-          <option value="20:00-21:00">20:00 - 21:00</option>
+          <option value="">-- Selecciona hora --</option>
+          <option>08:00-09:00</option>
+          <option>09:00-10:00</option>
+          <option>10:00-11:00</option>
         </select>
-        <div class="error-msg">Selecciona la hora.</div>
+        <div class="error-msg">Selecciona hora.</div>
       </div>
       <button type="submit"><i class="fas fa-calendar-check"></i> Confirmar Reserva</button>
     </form>
 
-    <div class="footer">
-      El acceso está permitido solo a residentes paz y salvo.
-    </div>
+    <div class="footer">El acceso está permitido solo a residentes autorizados.</div>
   </div>
 
   <script>
-    // Generar apartamentos
-    document.getElementById('torre').addEventListener('change', function() {
-      const torre = this.value;
-      const apt = document.getElementById('apartamento');
-      apt.innerHTML = '<option value="">-- Seleccione apartamento --</option>';
-      if (!torre) return;
-      const max = torre === 'K' ? 2 : 4;
-      for (let piso = 1; piso <= 5; piso++) {
-        for (let u = 1; u <= max; u++) {
-          const num = `${piso}${String(u).padStart(2,'0')}`;
-          const opt = document.createElement('option'); opt.value=num; opt.text=num;
-          apt.append(opt);
-        }
+    // Elements
+    const choice = document.getElementById('choice'), adminLogin = document.getElementById('admin-login');
+    const adminPanel = document.getElementById('admin-panel'), regForm = document.getElementById('form-registro');
+    const resForm = document.getElementById('form-reserva'), successBox = document.getElementById('success');
+
+    // Show/Hide
+    document.getElementById('btn-residente').onclick = () => { choice.hidden=true; regForm.hidden=false; };
+    document.getElementById('btn-admin').onclick = () => { choice.hidden=true; adminLogin.hidden=false; };
+
+    // Admin login
+    document.getElementById('admin-login').addEventListener('submit', e=>{
+      e.preventDefault();
+      const user=document.getElementById('admin-user').value;
+      const pass=document.getElementById('admin-pass').value;
+      if(user==='administrador' && pass==='Olga_3752'){
+        adminLogin.hidden=true;
+        adminPanel.hidden=false;
+      } else {
+        alert('Credenciales incorrectas.');
       }
     });
 
-    // Validación y flujo
-    const regForm = document.getElementById('form-registro');
-    const resForm = document.getElementById('form-reserva');
-    const successBox = document.getElementById('success');
+    // Save debtors
+    document.getElementById('save-morosos').onclick = ()=>{
+      const list = document.getElementById('morosos-input').value.split(',').map(s=>s.trim().toUpperCase());
+      localStorage.setItem('morosos', JSON.stringify(list));
+      alert('Lista de morosos actualizada.');
+    };
 
-    function validate(form) {
-      let valid = true;
-      form.querySelectorAll('.field').forEach(div => {
-        const input = div.querySelector('input, select');
-        const error = div.querySelector('.error-msg');
-        if (!input.checkValidity()) {
-          div.classList.add('error'); valid = false;
-        } else {
-          div.classList.remove('error');
-        }
-      });
-      return valid;
+    // Generate apartments
+    document.getElementById('torre').addEventListener('change', function(){
+      const t=this.value, apt=document.getElementById('apartamento'); apt.innerHTML='<option value="">-- Selecciona apto --</option>';
+      if(!t) return; const max = t==='K'?2:4;
+      for(let p=1;p<=5;p++) for(let u=1;u<=max;u++){ let num=`${p}${String(u).padStart(2,'0')}`;
+        apt.innerHTML+=`<option>${t}${num}</option>`;
+      }
+    });
+
+    // Validate form
+    function validate(form){ let ok=true;
+      form.querySelectorAll('.field').forEach(div=>{ const inp=div.querySelector('input,select');
+        const err=div.querySelector('.error-msg');
+        if(!inp.checkValidity()){ div.classList.add('error'); err.style.visibility='visible'; ok=false; }
+        else{ div.classList.remove('error'); err.style.visibility='hidden'; }
+      }); return ok;
     }
 
-    regForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (!validate(regForm)) return;
-      if (document.getElementById('estado').value !== 'pazysalvo') {
-        alert('No puedes continuar: Saldo pendiente.'); return;
+    // Registro submit
+    regForm.addEventListener('submit', e=>{
+      e.preventDefault(); if(!validate(regForm)) return;
+      const aptSel = document.getElementById('apartamento').value;
+      const morosos = JSON.parse(localStorage.getItem('morosos')||'[]');
+      if(morosos.includes(aptSel)){
+        alert('No puedes reservar: estás en lista de morosos.'); return;
       }
-      regForm.classList.add('hidden');
-      resForm.classList.remove('hidden');
+      regForm.hidden=true; resForm.hidden=false;
     });
 
-    resForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      if (!validate(resForm)) return;
-      successBox.textContent = `¡Reserva confirmada! Fecha: ${document.getElementById('fecha').value}, Hora: ${document.getElementById('hora').value}`;
-      successBox.style.display = 'block';
-      setTimeout(()=>location.reload(), 3000);
+    // Reserva submit
+    resForm.addEventListener('submit', e=>{
+      e.preventDefault(); if(!validate(resForm)) return;
+      successBox.textContent=`¡Reserva confirmada! ${document.getElementById('fecha').value} ${document.getElementById('hora').value}`;
+      successBox.style.display='block'; setTimeout(()=>location.reload(),3000);
     });
   </script>
 </body>
