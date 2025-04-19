@@ -1,32 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro y Reserva - Zona Húmeda</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro y Reserva Zona Húmeda</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body { font-family:'Roboto',sans-serif; background:#edf6f9; margin:0; padding:0; display:flex; justify-content:center; align-items:center; height:100vh; }
-    .container { background:#fff; padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; }
-    h1 { font-size:1.5rem; color:#006d77; text-align:center; margin-bottom:1rem; }
-    label { display:block; margin:0.75rem 0 0.25rem; color:#333; }
+    :root {
+      --primary: #006d77;
+      --primary-dark: #005a63;
+      --bg: #edf6f9;
+      --white: #fff;
+      --error: #e63946;
+      --success: #2a9d8f;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; padding:0; font-family:'Roboto',sans-serif; background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100vh; }
+    .container { background:var(--white); padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; transition: transform 0.3s ease; }
+    .container:focus-within { transform: scale(1.02); }
+    h1 { margin-bottom:1rem; font-size:1.5rem; color:var(--primary); text-align:center; }
+    label { display:block; margin:0.75rem 0 0.25rem; color:#333; font-weight:500; }
     input, select, button { width:100%; font-size:1rem; }
-    input, select { padding:0.5rem; border:1px solid #ccc; border-radius:8px; }
-    button { margin-top:1.5rem; padding:0.75rem; border:none; border-radius:8px; background:#006d77; color:#fff; cursor:pointer; transition:background 0.3s; }
-    button:hover { background:#005a63; }
+    input, select {
+      padding:0.5rem; border:1px solid #ccc; border-radius:8px; transition: border-color 0.3s;
+    }
+    input:focus, select:focus { border-color:var(--primary); outline:none; }
+    .error-msg { color:var(--error); font-size:0.85rem; height:1.2em; margin-top:0.2rem; visibility:hidden; }
+    .error input, .error select { border-color:var(--error); }
+    .success-msg { display:none; text-align:center; padding:1rem; border-radius:8px; background:var(--success); color:var(--white); margin-bottom:1rem; }
+    button {
+      margin-top:1.5rem; padding:0.75rem; border:none; border-radius:8px; background:var(--primary); color:var(--white); cursor:pointer; transition: background 0.3s, box-shadow 0.3s;
+    }
+    button:hover { background:var(--primary-dark); box-shadow:0 2px 8px rgba(0,0,0,0.2); }
     .hidden { display:none; }
     .footer { margin-top:1rem; font-size:0.8rem; color:#666; text-align:center; }
   </style>
 </head>
 <body>
   <div class="container">
+    <div id="success" class="success-msg"><i class="fas fa-check-circle"></i> ¡Operación exitosa!</div>
     <!-- Registro -->
-    <div id="registro">
+    <form id="form-registro" novalidate>
       <h1><i class="fas fa-user-edit"></i> Registro Usuario</h1>
-      <form id="form-registro">
+      <div class="field">
         <label for="nombre">Nombre completo:</label>
-        <input type="text" id="nombre" required placeholder="Ej. Ana Pérez" />
+        <input type="text" id="nombre" required placeholder="Ana Pérez" />
+        <div class="error-msg">Por favor ingresa tu nombre.</div>
+      </div>
+      <div class="field">
         <label for="torre">Torre:</label>
         <select id="torre" required>
           <option value="">-- Seleccione torre --</option>
@@ -34,28 +56,39 @@
           <option>E</option><option>F</option><option>G</option><option>H</option>
           <option>I</option><option>J</option><option>K</option>
         </select>
+        <div class="error-msg">Selecciona una torre.</div>
+      </div>
+      <div class="field">
         <label for="apartamento">Apartamento:</label>
         <select id="apartamento" required>
           <option value="">-- Seleccione torre primero --</option>
         </select>
+        <div class="error-msg">Selecciona un apartamento.</div>
+      </div>
+      <div class="field">
         <label for="estado">Estado de cartera:</label>
         <select id="estado" required>
           <option value="">-- Seleccione --</option>
           <option value="pazysalvo">Paz y salvo</option>
           <option value="pendiente">Con saldos pendientes</option>
         </select>
-        <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
-      </form>
-    </div>
+        <div class="error-msg">Indica tu estado de cartera.</div>
+      </div>
+      <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
+    </form>
 
     <!-- Reserva -->
-    <div id="reserva" class="hidden">
+    <form id="form-reserva" class="hidden" novalidate>
       <h1><i class="fas fa-swimmer"></i> Reserva Piscina</h1>
-      <form id="form-reserva">
+      <div class="field">
         <label for="fecha">Fecha:</label>
         <input type="date" id="fecha" required />
+        <div class="error-msg">Selecciona una fecha.</div>
+      </div>
+      <div class="field">
         <label for="hora">Hora:</label>
-        <select id="hora">
+        <select id="hora" required>
+          <option value="">-- Seleccione hora --</option>
           <option value="08:00-09:00">08:00 - 09:00</option>
           <option value="09:00-10:00">09:00 - 10:00</option>
           <option value="10:00-11:00">10:00 - 11:00</option>
@@ -70,17 +103,18 @@
           <option value="19:00-20:00">19:00 - 20:00</option>
           <option value="20:00-21:00">20:00 - 21:00</option>
         </select>
-        <button type="submit"><i class="fas fa-calendar-check"></i> Confirmar Reserva</button>
-      </form>
-    </div>
+        <div class="error-msg">Selecciona la hora.</div>
+      </div>
+      <button type="submit"><i class="fas fa-calendar-check"></i> Confirmar Reserva</button>
+    </form>
 
     <div class="footer">
-      <p>El acceso está permitido solo a residentes paz y salvo.</p>
+      El acceso está permitido solo a residentes paz y salvo.
     </div>
   </div>
 
   <script>
-    // Dinámico apartamentos según torre
+    // Generar apartamentos
     document.getElementById('torre').addEventListener('change', function() {
       const torre = this.value;
       const apt = document.getElementById('apartamento');
@@ -90,31 +124,47 @@
       for (let piso = 1; piso <= 5; piso++) {
         for (let u = 1; u <= max; u++) {
           const num = `${piso}${String(u).padStart(2,'0')}`;
-          const opt = document.createElement('option'); opt.value = num; opt.text = num;
+          const opt = document.createElement('option'); opt.value=num; opt.text=num;
           apt.append(opt);
         }
       }
     });
 
-    // Registro y navegación a reserva
-    document.getElementById('form-registro').addEventListener('submit', function(e) {
+    // Validación y flujo
+    const regForm = document.getElementById('form-registro');
+    const resForm = document.getElementById('form-reserva');
+    const successBox = document.getElementById('success');
+
+    function validate(form) {
+      let valid = true;
+      form.querySelectorAll('.field').forEach(div => {
+        const input = div.querySelector('input, select');
+        const error = div.querySelector('.error-msg');
+        if (!input.checkValidity()) {
+          div.classList.add('error'); valid = false;
+        } else {
+          div.classList.remove('error');
+        }
+      });
+      return valid;
+    }
+
+    regForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const estado = document.getElementById('estado').value;
-      if (estado !== 'pazysalvo') {
-        alert('No puedes continuar: Saldo pendiente.');
-        return;
+      if (!validate(regForm)) return;
+      if (document.getElementById('estado').value !== 'pazysalvo') {
+        alert('No puedes continuar: Saldo pendiente.'); return;
       }
-      document.getElementById('registro').classList.add('hidden');
-      document.getElementById('reserva').classList.remove('hidden');
+      regForm.classList.add('hidden');
+      resForm.classList.remove('hidden');
     });
 
-    // Confirmar reserva
-    document.getElementById('form-reserva').addEventListener('submit', function(e) {
+    resForm.addEventListener('submit', function(e) {
       e.preventDefault();
-      const fecha = document.getElementById('fecha').value;
-      const hora = document.getElementById('hora').value;
-      alert(`Reserva confirmada:\nFecha: ${fecha}\nHora: ${hora}`);
-      location.reload();
+      if (!validate(resForm)) return;
+      successBox.textContent = `¡Reserva confirmada! Fecha: ${document.getElementById('fecha').value}, Hora: ${document.getElementById('hora').value}`;
+      successBox.style.display = 'block';
+      setTimeout(()=>location.reload(), 3000);
     });
   </script>
 </body>
