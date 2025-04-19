@@ -3,99 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Acceso - Zona Húmeda</title>
+  <title>Demo Registro y Reserva - Zona Húmeda</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: 'Roboto', sans-serif;
       background: linear-gradient(to bottom right, #83c5be, #edf6f9);
       margin: 0;
       padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
     }
-
+    nav {
+      background: #006d77;
+      padding: 0.5rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+    nav a {
+      color: #edf6f9;
+      text-decoration: none;
+      margin: 0 1rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
     .container {
       background: #ffffff;
       padding: 2rem;
       border-radius: 16px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
       max-width: 400px;
-      width: 90%;
+      margin: 2rem auto;
       text-align: center;
     }
-
-    h1 {
-      font-size: 1.5rem;
-      color: #006d77;
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      margin: 1rem 0 0.5rem;
-      text-align: left;
-      color: #333;
-    }
-
+    .section { display: none; }
+    .section.active { display: block; }
+    h1 { color: #006d77; margin-bottom: 1rem; }
+    label { display: block; margin: 1rem 0 0.5rem; text-align: left; color: #333; }
     input, select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 1rem;
+      width: 100%; padding: 0.5rem; border: 1px solid #ccc;
+      border-radius: 8px; font-size: 1rem;
     }
-
     button {
-      margin-top: 1.5rem;
-      background-color: #006d77;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.2rem;
-      font-size: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      margin-top: 1.5rem; background-color: #006d77; color: #fff;
+      border: none; padding: 0.75rem 1.2rem; font-size: 1rem;
+      border-radius: 10px; cursor: pointer; transition: background-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #005a63;
-    }
-
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.8rem;
-      color: #666;
-    }
+    button:hover { background-color: #005a63; }
+    .footer { margin-top: 1.5rem; font-size: 0.8rem; color: #666; }
   </style>
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      // Toggle nav visibility
+      document.getElementById('nav').style.display = id === 'login' ? 'none' : 'flex';
+    }
+    function login() {
+      // Aquí podrías validar credenciales
+      showSection('home');
+    }
+    function logout() { showSection('login'); }
+    function toReserva() { showSection('reserva'); }
+    function toPerfil() { showSection('perfil'); }
+    window.onload = function() { showSection('login'); };
+  </script>
 </head>
 <body>
-  <div class="container">
-    <h1><i class="fas fa-swimmer"></i> Registro de Acceso Zona Húmeda</h1>
+  <nav id="nav">
+    <a onclick="showSection('home')"><i class="fas fa-home"></i> Home</a>
+    <a onclick="toReserva()"><i class="fas fa-calendar-check"></i> Reservar</a>
+    <a onclick="toPerfil()"><i class="fas fa-user"></i> Perfil</a>
+    <a onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+  </nav>
 
-    <form>
-      <label for="nombre">Nombre completo:</label>
-      <input type="text" id="nombre" name="nombre" placeholder="Ej. Ana Pérez" required />
+  <!-- Login -->
+  <div id="login" class="section">
+    <div class="container">
+      <h1><i class="fas fa-lock"></i> Iniciar Sesión</h1>
+      <label for="email">Email:</label>
+      <input type="email" id="email" placeholder="usuario@dominio.com" required />
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      <button onclick="login()"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+    </div>
+  </div>
 
-      <label for="apartamento">Apartamento / Torre:</label>
-      <input type="text" id="apartamento" name="apartamento" placeholder="Ej. Torre 2, Apto 304" required />
+  <!-- Home -->
+  <div id="home" class="section">
+    <div class="container">
+      <h1><i class="fas fa-thumbs-up"></i> Bienvenido, Usuario</h1>
+      <p>Estado de cartera: <strong style="color:green;">Paz y salvo</strong></p>
+      <button onclick="toReserva()"><i class="fas fa-swimmer"></i> Reservar Turno Piscina</button>
+      <div class="footer">Solo residentes al día pueden reservar.</div>
+    </div>
+  </div>
 
-      <label for="estado">Estado de cartera:</label>
-      <select id="estado" name="estado" required>
-        <option value="">-- Selecciona --</option>
-        <option value="pazysalvo">Paz y salvo</option>
-        <option value="pendiente">Con saldos pendientes</option>
+  <!-- Reserva -->
+  <div id="reserva" class="section">
+    <div class="container">
+      <h1><i class="fas fa-calendar-alt"></i> Reserva de Turno</h1>
+      <label for="fecha">Fecha:</label>
+      <input type="date" id="fecha" required />
+      <label for="hora">Hora:</label>
+      <select id="hora">
+        <option value="08:00-09:00">08:00 - 09:00</option>
+        <option value="09:00-10:00">09:00 - 10:00</option>
+        <option value="10:00-11:00">10:00 - 11:00</option>
       </select>
+      <button onclick="alert('¡Reserva confirmada!'); showSection('home');">
+        <i class="fas fa-check-circle"></i> Confirmar Reserva
+      </button>
+      <button onclick="showSection('home');" style="background:#ccc; color:#333; margin-left:5px;">
+        <i class="fas fa-times-circle"></i> Cancelar
+      </button>
+    </div>
+  </div>
 
-      <button type="submit"><i class="fas fa-check-circle"></i> Registrar acceso</button>
-    </form>
-
-    <div class="footer">
-      <p>El acceso está permitido solo a residentes en paz y salvo con la administración.</p>
-      <p>&copy; 2025 Unidad Residencial - Zona Húmeda</p>
+  <!-- Perfil -->
+  <div id="perfil" class="section">
+    <div class="container">
+      <h1><i class="fas fa-user-circle"></i> Mi Perfil</h1>
+      <label>Nombre:</label>
+      <input type="text" value="Ana Pérez" disabled />
+      <label>Apartamento:</label>
+      <input type="text" value="Torre 2, Apto 304" disabled />
+      <div class="footer">Historial de reservas y ajustes de cuenta.</div>
     </div>
   </div>
 </body>
