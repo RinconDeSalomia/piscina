@@ -17,13 +17,17 @@
     input, select, button, textarea { width:100%; font-size:1rem; }
     input, select, textarea { padding:0.5rem; border:1px solid #ccc; border-radius:8px; transition:border-color 0.3s; }
     input:focus, select:focus, textarea:focus { border-color:var(--primary); outline:none; }
-    .error-msg { color:var(--error); font-size:0.85rem; height:1.2em; margin-top:0.2rem; visibility:hidden; }
+    .field { margin-bottom:0.5rem; }
+    .error-msg { color:var(--error); font-size:0.85rem; height:1.2em; visibility:hidden; }
     .error input, .error select { border-color:var(--error); }
     .success-msg { display:none; text-align:center; padding:1rem; border-radius:8px; background:var(--success); color:var(--white); margin-bottom:1rem; }
     button { margin-top:1.5rem; padding:0.75rem; border:none; border-radius:8px; background:var(--primary); color:var(--white); cursor:pointer; transition:background 0.3s, box-shadow 0.3s; }
     button:hover { background:var(--primary-dark); box-shadow:0 2px 8px rgba(0,0,0,0.2); }
     .hidden { display:none !important; }
     .footer { margin-top:1rem; font-size:0.8rem; color:#666; text-align:center; }
+    table { width:100%; border-collapse:collapse; margin-top:1rem; }
+    th, td { border:1px solid #ccc; padding:0.5rem; text-align:center; }
+    th { background:var(--bg); }
   </style>
 </head>
 <body>
@@ -57,8 +61,11 @@
     <div id="admin-panel" class="hidden">
       <h1><i class="fas fa-file-upload"></i> Lista Morosos</h1>
       <p>Pega los apartamentos (ej: F101,F102) separados por comas:</p>
-      <textarea id="morosos-input" rows="4" placeholder="A101,B202,C303"></textarea>
+      <textarea id="morosos-input" rows="3" placeholder="A101,B202,C303"></textarea>
       <button id="save-morosos" type="button"><i class="fas fa-save"></i> Guardar Listado</button>
+      <button id="view-reservas" type="button"><i class="fas fa-list"></i> Ver Reservas</button>
+      <button id="download-reservas" type="button"><i class="fas fa-download"></i> Descargar CSV</button>
+      <div id="reservas-list" class="hidden"></div>
       <div class="footer">Los morosos no podrán reservar.</div>
     </div>
 
@@ -116,7 +123,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('Script cargado');
       const choice = document.getElementById('choice');
       const adminLogin = document.getElementById('admin-login');
       const adminPanel = document.getElementById('admin-panel');
@@ -124,92 +130,96 @@
       const resForm = document.getElementById('form-reserva');
       const successBox = document.getElementById('success');
 
-      // Botones de elección
-      document.getElementById('btn-residente').addEventListener('click', () => {
-        choice.classList.add('hidden');
-        regForm.classList.remove('hidden');
-      });
-      document.getElementById('btn-admin').addEventListener('click', () => {
-        choice.classList.add('hidden');
-        adminLogin.classList.remove('hidden');
-      });
+      // Elección de rol
+      document.getElementById('btn-residente').onclick = () => {
+        choice.classList.add('hidden'); regForm.classList.remove('hidden');
+      };
+      document.getElementById('btn-admin').onclick = () => {
+        choice.classList.add('hidden'); adminLogin.classList.remove('hidden');
+      };
 
       // Login Admin
-      document.getElementById('admin-login').addEventListener('submit', e => {
+      adminLogin.addEventListener('submit', e => {
         e.preventDefault();
         const user = document.getElementById('admin-user').value;
         const pass = document.getElementById('admin-pass').value;
         if (user === 'administrador' && pass === 'Olga_4650') {
-          adminLogin.classList.add('hidden');
-          adminPanel.classList.remove('hidden');
-        } else {
-          alert('Credenciales incorrectas.');
-        }
+          adminLogin.classList.add('hidden'); adminPanel.classList.remove('hidden');
+        } else alert('Credenciales incorrectas.');
       });
 
-      // Guardar lista de morosos
-      document.getElementById('save-morosos').addEventListener('click', () => {
-        const list = document.getElementById('morosos-input').value
-          .split(',')
-          .map(s => s.trim().toUpperCase())
-          .filter(s => s);
+      // Guardar morosos
+      document.getElementById('save-morosos').onclick = () => {
+        const list = document.getElementById('morosos-input').value.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
         localStorage.setItem('morosos', JSON.stringify(list));
         alert('Lista de morosos actualizada.');
-      });
+      };
 
-      // Generar apartamentos según torre
+      // Ver y descargar reservas
+      document.getElementById('view-reservas').onclick = () => {
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
+        const container = document.getElementById('reservas-list');
+        if (!reservas.length) container.innerHTML = '<p>No hay reservas.</p>';
+        else {
+          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          reservas.forEach(r => html += `<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          container.innerHTML = html + '</tbody></table>';
+        }
+        container.classList.remove('hidden');
+      };
+      document.getElementById('download-reservas').onclick = () => {
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
+        let csv = 'Nombre,Apto,Fecha,Hora\n';
+        reservas.forEach(r => csv += `${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='reservas_piscina.csv'; a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      // Generar apartamentos
       document.getElementById('torre').addEventListener('change', function() {
-        const t = this.value;
-        const apt = document.getElementById('apartamento');
-        apt.innerHTML = '<option value="">-- Selecciona apto --</option>';
-        if (!t) return;
-        const max = t === 'K' ? 2 : 4;
-        for (let piso = 1; piso <= 5; piso++) {
-          for (let u = 1; u <= max; u++) {
-            const num = `${t}${piso}${String(u).padStart(2, '0')}`;
-            const opt = document.createElement('option'); opt.value = num; opt.text = num;
-            apt.appendChild(opt);
-          }
+        const t = this.value; const apt = document.getElementById('apartamento'); apt.innerHTML = '<option value="">-- Selecciona apto --</option>';
+        if (!t) return; const max = t==='K'?2:4;
+        for (let p=1; p<=5; p++) for (let u=1; u<=max; u++) {
+          const num = `${t}${p}${String(u).padStart(2,'0')}`;
+          const opt = document.createElement('option'); opt.value=num; opt.text=num; apt.appendChild(opt);
         }
       });
 
-      // Validación de campos
+      // Validación
       function validate(form) {
-        let valid = true;
-        form.querySelectorAll('.field').forEach(div => {
-          const inp = div.querySelector('input,select');
-          const err = div.querySelector('.error-msg');
-          if (!inp.checkValidity()) {
-            div.classList.add('error'); err.style.visibility = 'visible'; valid = false;
-          } else {
-            div.classList.remove('error'); err.style.visibility = 'hidden';
-          }
-        });
-        return valid;
+        let ok = true; form.querySelectorAll('.field').forEach(div => {
+          const inp = div.querySelector('input,select'); const err = div.querySelector('.error-msg');
+          if (!inp.checkValidity()) { div.classList.add('error'); err.style.visibility='visible'; ok=false; }
+          else { div.classList.remove('error'); err.style.visibility='hidden'; }
+        }); return ok;
       }
 
       // Registro Residente
       regForm.addEventListener('submit', e => {
-        e.preventDefault();
-        if (!validate(regForm)) return;
-        const aptSel = document.getElementById('apartamento').value;
-        const morosos = JSON.parse(localStorage.getItem('morosos') || '[]');
-        if (morosos.includes(aptSel)) {
-          alert('No puedes reservar: estás en lista de morosos.'); return;
-        }
-        regForm.classList.add('hidden');
-        resForm.classList.remove('hidden');
+        e.preventDefault(); if (!validate(regForm)) return;
+        const nombre = document.getElementById('nombre').value;
+        const apartamento = document.getElementById('apartamento').value;
+        const morosos = JSON.parse(localStorage.getItem('morosos')||'[]');
+        if (morosos.includes(apartamento)) { alert('No puedes reservar: estás en lista de morosos.'); return; }
+        regForm.classList.add('hidden'); resForm.classList.remove('hidden');
+        // Guardar reserva
+        const reserva = {nombre, apartamento, fecha:'', hora:''};
+        localStorage.setItem('currentReserva', JSON.stringify(reserva));
       });
 
       // Reserva Piscina
       resForm.addEventListener('submit', e => {
-        e.preventDefault();
-        if (!validate(resForm)) return;
-        const fecha = document.getElementById('fecha').value;
-        const hora = document.getElementById('hora').value;
-        successBox.textContent = `¡Reserva confirmada! Fecha: ${fecha}, Hora: ${hora}`;
-        successBox.style.display = 'block';
-        setTimeout(() => location.reload(), 3000);
+        e.preventDefault(); if (!validate(resForm)) return;
+        const reserva = JSON.parse(localStorage.getItem('currentReserva')||'{}');
+        reserva.fecha = document.getElementById('fecha').value;
+        reserva.hora = document.getElementById('hora').value;
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
+        reservas.push(reserva);
+        localStorage.setItem('reservas', JSON.stringify(reservas));
+        successBox.textContent = `¡Reserva confirmada! ${reserva.fecha} ${reserva.hora}`;
+        successBox.style.display = 'block'; setTimeout(() => location.reload(), 3000);
       });
     });
   </script>
