@@ -101,12 +101,7 @@
         </select>
         <div class="error-msg">Selecciona apartamento.</div>
       </div>
-      <!-- Campo de password basado en apartamento -->
-      <div class="field">
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" readonly placeholder="Se genera automáticamente" />
-        <div class="error-msg">La contraseña debe coincidir con el apartamento.</div>
-      </div>
+      
       <!-- Checkbox de aceptación de política de datos -->
       <div class="checkbox-container">
         <input type="checkbox" id="acepto-politica" required />
@@ -115,6 +110,7 @@
         </label>
       </div>
       <div class="error-msg" id="politica-error">Debes aceptar la política de tratamiento de datos.</div>
+      
       <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
     </form>
 
@@ -129,7 +125,22 @@
     <div id="reglamento" class="hidden">
       <h1><i class="fas fa-book"></i> Reglamento Piscina</h1>
       <ul class="reglamento-list">
-        <!-- Reglamentos existentes -->
+        <li>1. El uso de la piscina y demás servicios que ofrece la copropiedad es de preferencia para uso de copropietarios y arrendatarios.</li>
+        <li>2. La piscina solo estará disponible de 8:00 am a 9:00 pm.</li>
+        <li>3. Los niños menores de 12 años deben estar acompañados de sus padres o un adulto responsable delegado por ellos. Cualquier accidente que se produzca, será de responsabilidad exclusiva de los padres del menor.</li>
+        <li>4. No habrá servicio de piscina el día lunes a causa del mantenimiento necesario, o el día hábil siguiente si éste ha sido festivo; o en casos excepcionales donde se presente un detrimento o contaminación durante el tiempo que sea necesario para su recuperación.</li>
+        <li>5. Para el uso piscina solo debe usarse prendas apropiadas (traje de baño, prendas en lícra, pantalonetas impermeables y gorros). Es importante que no se use prendas de algodón Los bebes o personas que no tengan control de esfínteres deberán usar pañales especiales para dicha actividad, con el fin de regular la higiene y mantenimiento del agua.</li>
+        <li>6. Para conservar la piscina en óptimas condiciones los residentes deberán utilizar la ducha antes de su ingreso, evitar el uso de aceites y productos dentro de la piscina e ingresar en condiciones de higiene adecuadas para su uso.</li>
+        <li>7. Las personas que tengan enfermedades cutáneas, heridas profundas o problemas de tipo sanguíneo y enfermedades infectocontagiosas deben abstenerse de utilizar la piscina y las zonas húmedas.</li>
+        <li>8. La zona de piscina tendrá un número razonable de invitados para cada apartamento de 2 personas y este es responsable del comportamiento de sus invitados.</li>
+        <li>9. No se permite ingerir licor ni consumir sustancias psicoactivas en la zona de piscina y salón social. Las personas en estado de embriaguez, serán retiradas de la misma con el fin de prevenir accidentes.</li>
+        <li>10. Está prohibido la presencia de animales en la piscina y salón social.</li>
+        <li>11. Por seguridad se prohíbe rotundamente, el consumo de bebidas en envase de vidrios y similares. Tampoco la circulación por los alrededores de la piscina en bicicleta, triciclo, patines o similares con el fin de evitar accidentes.</li>
+        <li>12. El uso moderado de equipos y radios en la zona de piscina solo se permite hasta la hora de servicio de la misma, cumpliendo con las normas establecidas en el código de policía y ambiental. Por seguridad no se permite realizar conexiones de los mencionados equipos o extensiones eléctricas sobre la zona dura perimetral de la piscina.</li>
+        <li>13. No se permiten juegos en la piscina con piedras u objetos duros ni balones de cuero ni artículos que no sean apropiados para la piscina.</li>
+        <li>14. Se prohíbe, en las zonas alrededor de la piscina o similares, efectuar asados o fogatas, que provoquen incendios o daños a las zonas verdes de la copropiedad.</li>
+        <li>15. La piscina solo puede ser utilizada siempre y cuando el estado del clima sea óptimo y no ponga en peligro la vida de un residente de la copropiedad. Los implementos de salvamento no son de uso recreativo, dentro o fuera de la piscina.</li>
+        <li>16. Por medidas de seguridad y buen comportamiento se prohíbe el ingreso al ascensor de personas que recién salen de la piscina sin haberse secado adecuadamente.</li>
       </ul>
       <button id="close-reglamento" type="button">Cerrar</button>
     </div>
@@ -146,7 +157,20 @@
       <div class="field">
         <label for="hora">Hora:</label>
         <select id="hora" required>
-          <!-- Horarios existentes -->
+          <option value="">-- Selecciona hora --</option>
+          <option>08:00-09:00</option>
+          <option>09:00-10:00</option>
+          <option>10:00-11:00</option>
+          <option>11:00-12:00</option>
+          <option>12:00-13:00</option>
+          <option>13:00-14:00</option>
+          <option>14:00-15:00</option>
+          <option>15:00-16:00</option>
+          <option>16:00-17:00</option>
+          <option>17:00-18:00</option>
+          <option>18:00-19:00</option>
+          <option>19:00-20:00</option>
+          <option>20:00-21:00</option>
         </select>
         <div class="error-msg">Selecciona hora.</div>
       </div>
@@ -158,17 +182,170 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Elementos clave
-      const aptSelect = document.getElementById('apartamento');
-      const pwdInput = document.getElementById('password');
+      const choice = document.getElementById('choice');
+      const adminLogin = document.getElementById('admin-login');
+      const adminPanel = document.getElementById('admin-panel');
+      const regForm = document.getElementById('form-registro');
+      const resForm = document.getElementById('form-reserva');
+      const misReservasDiv = document.getElementById('mis-reservas');
+      const misReservasList = document.getElementById('mis-reservas-list');
+      const closeMis = document.getElementById('close-mis-reservas');
+      const reglamentoDiv = document.getElementById('reglamento');
+      const closeReg = document.getElementById('close-reglamento');
+      const btnVerReg = document.getElementById('btn-ver-reglamento');
+      const successBox = document.getElementById('success');
+      const aceptoPolitica = document.getElementById('acepto-politica');
+      const politicaError = document.getElementById('politica-error');
+      const politicaLink = document.getElementById('politica-link');
+      let currentApartamento = '';
 
-      // Cuando cambie el apartamento, asignar contraseña igual al valor seleccionado
-      aptSelect.addEventListener('change', function() {
-        pwdInput.value = this.value;
+      // Elección de rol
+      document.getElementById('btn-residente').onclick = () => { choice.classList.add('hidden'); regForm.classList.remove('hidden'); };
+      document.getElementById('btn-admin').onclick = () => { choice.classList.add('hidden'); adminLogin.classList.remove('hidden'); };
+
+      // Login Admin
+      adminLogin.addEventListener('submit', e => {
+        e.preventDefault();
+        const user = document.getElementById('admin-user').value;
+        const pass = document.getElementById('admin-pass').value;
+        if (user==='administrador' && pass==='Olga_4650') {
+          adminLogin.classList.add('hidden'); adminPanel.classList.remove('hidden');
+        } else alert('Credenciales incorrectas.');
       });
 
-      // Resto del script permanece igual (registro, reservas, admin, reglamento, validación, etc.)
-      // ...
+      // Guardar morosos
+      document.getElementById('save-morosos').onclick = () => {
+        const list = document.getElementById('morosos-input').value.split(',').map(s=>s.trim().toUpperCase()).filter(s=>s);
+        localStorage.setItem('morosos', JSON.stringify(list)); alert('Lista de morosos actualizada.');
+      };
+
+      // Admin reservas
+      document.getElementById('view-reservas').onclick = viewAdminReservas;
+      document.getElementById('download-reservas').onclick = downloadReservas;
+
+      // Mostrar reglamento en reserva
+      btnVerReg.addEventListener('click', () => {
+        resForm.classList.add('hidden'); reglamentoDiv.classList.remove('hidden');
+      });
+      closeReg.addEventListener('click', () => {
+        reglamentoDiv.classList.add('hidden'); resForm.classList.remove('hidden');
+      });
+
+      // Generar apartamentos
+      document.getElementById('torre').addEventListener('change', function() {
+        const t=this.value; const apt=document.getElementById('apartamento'); apt.innerHTML='<option value="">-- Selecciona apto --</option>';
+        if(!t) return; const max=t==='K'?2:4; for(let p=1;p<=5;p++) for(let u=1;u<=max;u++){ const num=`${t}${p}${String(u).padStart(2,'0')}`;
+          const opt=document.createElement('option'); opt.value=num; opt.text=num; apt.appendChild(opt);
+        }
+      });
+
+      // Validación
+      function validate(form) {
+        let ok=true; 
+        form.querySelectorAll('.field').forEach(div=>{ 
+          const inp=div.querySelector('input,select'); 
+          const err=div.querySelector('.error-msg');
+          if(!inp.checkValidity()){ 
+            div.classList.add('error'); 
+            err.style.visibility='visible'; 
+            ok=false; 
+          } else { 
+            div.classList.remove('error'); 
+            err.style.visibility='hidden'; 
+          }
+        }); 
+        
+        // Validación específica para checkbox de política
+        if(form.id === 'form-registro' && !aceptoPolitica.checked) {
+          politicaError.style.visibility = 'visible';
+          aceptoPolitica.parentElement.classList.add('error');
+          ok = false;
+        } else {
+          politicaError.style.visibility = 'hidden';
+          aceptoPolitica.parentElement.classList.remove('error');
+        }
+        
+        return ok;
+      }
+
+      // Registro Residente
+      regForm.addEventListener('submit', e=>{
+        e.preventDefault(); 
+        if(!validate(regForm)) return;
+        
+        const nombre=document.getElementById('nombre').value;
+        const apartamento=document.getElementById('apartamento').value; 
+        currentApartamento=apartamento;
+        
+        const morosos=JSON.parse(localStorage.getItem('morosos')||'[]'); 
+        if(morosos.includes(apartamento)){ 
+          alert('No puedes reservar: estás en lista de morosos.'); 
+          return; 
+        }
+        
+        regForm.classList.add('hidden'); 
+        showMisReservas(apartamento); 
+        resForm.classList.remove('hidden');
+        localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
+      });
+
+      // Mostrar política de datos al hacer clic en el enlace
+      politicaLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert(`POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES\n\nConforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia, el Conjunto Residencial Rincon de Salomia informa que los datos personales recolectados serán utilizados exclusivamente para:\n\n1. Gestión de reservas y acceso a zonas comunes\n2. Comunicación con residentes\n3. Cumplimiento de obligaciones legales\n\nLos datos no serán compartidos con terceros sin autorización previa. Puede ejercer sus derechos de acceso, corrección, actualización o supresión de datos contactando a la administración.`);
+      });
+
+      // Mostrar mis reservas
+      function showMisReservas(apto){ 
+        const all=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const filt=all.filter(r=>r.apartamento===apto);
+        if(!filt.length) misReservasList.innerHTML='<p>No tienes reservas previas.</p>'; else{
+          let html='<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          filt.forEach(r=> html+=`<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          misReservasList.innerHTML=html+'</tbody></table>';
+        } 
+        misReservasDiv.classList.remove('hidden'); 
+      }
+      
+      closeMis.addEventListener('click', ()=> misReservasDiv.classList.add('hidden'));
+
+      // Reserva Piscina
+      resForm.addEventListener('submit', e=>{
+        e.preventDefault(); 
+        if(!validate(resForm)) return;
+        const reserva=JSON.parse(localStorage.getItem('currentReserva')||'{}');
+        reserva.fecha=document.getElementById('fecha').value;
+        reserva.hora=document.getElementById('hora').value;
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); reservas.push(reserva);
+        localStorage.setItem('reservas', JSON.stringify(reservas));
+        successBox.textContent=`¡Reserva confirmada! ${reserva.fecha} ${reserva.hora}`;
+        successBox.style.display='block'; setTimeout(()=>location.reload(),3000);
+      });
+
+      // Admin ver/download reservas
+      function viewAdminReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        const c=document.getElementById('reservas-list');
+        if(!reservas.length) c.innerHTML='<p>No hay reservas.</p>'; else{ 
+          let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          reservas.forEach(r=> html+=`<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          c.innerHTML=html+'</tbody></table>'; 
+        } 
+        c.classList.remove('hidden'); 
+      }
+      
+      function downloadReservas(){ 
+        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
+        let csv='Nombre,Apto,Fecha,Hora\n';
+        reservas.forEach(r=> csv+=`${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
+        const blob=new Blob([csv],{type:'text/csv'}); 
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a'); 
+        a.href=url; 
+        a.download='reservas_piscina.csv'; 
+        a.click(); 
+        URL.revokeObjectURL(url);
+      }
     });
   </script>
 </body>
