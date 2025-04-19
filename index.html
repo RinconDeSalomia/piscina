@@ -97,6 +97,13 @@
       <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
     </form>
 
+    <!-- Mis Reservas Residentes -->
+    <div id="mis-reservas" class="hidden">
+      <h1><i class="fas fa-history"></i> Mis Reservas</h1>
+      <div id="mis-reservas-list"></div>
+      <button id="close-mis-reservas" type="button">Cerrar</button>
+    </div>
+
     <!-- Reserva -->
     <form id="form-reserva" class="hidden" novalidate>
       <h1><i class="fas fa-swimmer"></i> Reserva Piscina</h1>
@@ -128,6 +135,9 @@
       const adminPanel = document.getElementById('admin-panel');
       const regForm = document.getElementById('form-registro');
       const resForm = document.getElementById('form-reserva');
+      const misReservasDiv = document.getElementById('mis-reservas');
+      const misReservasList = document.getElementById('mis-reservas-list');
+      const closeMis = document.getElementById('close-mis-reservas');
       const successBox = document.getElementById('success');
 
       // Elección de rol
@@ -143,7 +153,7 @@
         e.preventDefault();
         const user = document.getElementById('admin-user').value;
         const pass = document.getElementById('admin-pass').value;
-        if (user === 'administrador' && pass === 'Olga_4650') {
+        if (user === 'administrador' && pass === 'Olga_3752') {
           adminLogin.classList.add('hidden'); adminPanel.classList.remove('hidden');
         } else alert('Credenciales incorrectas.');
       });
@@ -155,27 +165,9 @@
         alert('Lista de morosos actualizada.');
       };
 
-      // Ver y descargar reservas
-      document.getElementById('view-reservas').onclick = () => {
-        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
-        const container = document.getElementById('reservas-list');
-        if (!reservas.length) container.innerHTML = '<p>No hay reservas.</p>';
-        else {
-          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
-          reservas.forEach(r => html += `<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
-          container.innerHTML = html + '</tbody></table>';
-        }
-        container.classList.remove('hidden');
-      };
-      document.getElementById('download-reservas').onclick = () => {
-        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
-        let csv = 'Nombre,Apto,Fecha,Hora\n';
-        reservas.forEach(r => csv += `${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
-        const blob = new Blob([csv], {type:'text/csv'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href=url; a.download='reservas_piscina.csv'; a.click();
-        URL.revokeObjectURL(url);
-      };
+      // Ver y descargar reservas en admin
+      document.getElementById('view-reservas').onclick = viewAdminReservas;
+      document.getElementById('download-reservas').onclick = downloadReservas;
 
       // Generar apartamentos
       document.getElementById('torre').addEventListener('change', function() {
@@ -196,18 +188,36 @@
         }); return ok;
       }
 
+      let currentApartamento = '';
+
       // Registro Residente
       regForm.addEventListener('submit', e => {
         e.preventDefault(); if (!validate(regForm)) return;
         const nombre = document.getElementById('nombre').value;
         const apartamento = document.getElementById('apartamento').value;
+        currentApartamento = apartamento;
         const morosos = JSON.parse(localStorage.getItem('morosos')||'[]');
         if (morosos.includes(apartamento)) { alert('No puedes reservar: estás en lista de morosos.'); return; }
-        regForm.classList.add('hidden'); resForm.classList.remove('hidden');
-        // Guardar reserva
-        const reserva = {nombre, apartamento, fecha:'', hora:''};
-        localStorage.setItem('currentReserva', JSON.stringify(reserva));
+        regForm.classList.add('hidden');
+        showMisReservas(apartamento);
+        resForm.classList.remove('hidden');
+        // Guardar reserva base
+        localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
       });
+
+      // Mostrar mis reservas de este apto
+      function showMisReservas(apto) {
+        const all = JSON.parse(localStorage.getItem('reservas')||'[]');
+        const filt = all.filter(r => r.apartamento === apto);
+        if (!filt.length) misReservasList.innerHTML = '<p>No tienes reservas previas.</p>';
+        else {
+          let html = '<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          filt.forEach(r => html += `<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          misReservasList.innerHTML = html + '</tbody></table>';
+        }
+        misReservasDiv.classList.remove('hidden');
+      }
+      closeMis.addEventListener('click', () => misReservasDiv.classList.add('hidden'));
 
       // Reserva Piscina
       resForm.addEventListener('submit', e => {
@@ -215,12 +225,33 @@
         const reserva = JSON.parse(localStorage.getItem('currentReserva')||'{}');
         reserva.fecha = document.getElementById('fecha').value;
         reserva.hora = document.getElementById('hora').value;
-        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
-        reservas.push(reserva);
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]'); reservas.push(reserva);
         localStorage.setItem('reservas', JSON.stringify(reservas));
         successBox.textContent = `¡Reserva confirmada! ${reserva.fecha} ${reserva.hora}`;
         successBox.style.display = 'block'; setTimeout(() => location.reload(), 3000);
       });
+
+      // Admin: ver reservas
+      function viewAdminReservas() {
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
+        const container = document.getElementById('reservas-list');
+        if (!reservas.length) container.innerHTML = '<p>No hay reservas.</p>';
+        else {
+          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          reservas.forEach(r => html += `<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
+          container.innerHTML = html + '</tbody></table>';
+        }
+        container.classList.remove('hidden');
+      }
+      // Admin: descargar CSV
+      function downloadReservas() {
+        const reservas = JSON.parse(localStorage.getItem('reservas')||'[]');
+        let csv = 'Nombre,Apto,Fecha,Hora\n';
+        reservas.forEach(r => csv += `${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
+        const blob = new Blob([csv], {type:'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download='reservas_piscina.csv'; a.click(); URL.revokeObjectURL(url);
+      }
     });
   </script>
 </body>
