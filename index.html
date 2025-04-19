@@ -76,32 +76,27 @@
       <div class="footer">Los morosos no podrán reservar.</div>
     </div>
 
-    <!-- Registro Residente -->
-    <form id="form-registro" class="hidden" novalidate>
-      <h1><i class="fas fa-user-edit"></i> Registro Usuario</h1>
-      <div class="field">
-        <label for="nombre">Nombre completo:</label>
-        <input type="text" id="nombre" required placeholder="Ana Pérez" />
-        <div class="error-msg">Ingresa tu nombre.</div>
-      </div>
-      <div class="field">
-        <label for="torre">Torre:</label>
-        <select id="torre" required>
-          <option value="">-- Selecciona torre --</option>
-          <option>A</option><option>B</option><option>C</option><option>D</option>
-          <option>E</option><option>F</option><option>G</option><option>H</option>
-          <option>I</option><option>J</option><option>K</option>
-        </select>
-        <div class="error-msg">Selecciona torre.</div>
-      </div>
-      <div class="field">
-        <label for="apartamento">Apartamento:</label>
-        <select id="apartamento" required>
-          <option value="">-- Selecciona torre primero --</option>
-        </select>
-        <div class="error-msg">Selecciona apartamento.</div>
-      </div>
-      
+    <!-- Login Residente -->
+  <form id="residente-login" class="hidden" novalidate>
+  <h1><i class="fas fa-user"></i> Acceso Residente</h1>
+  <div class="field">
+    <label for="residente-apt">Apartamento:</label>
+    <select id="residente-apt" required>
+      <option value="">Seleccione su apartamento</option>
+      <option value="K502">K502</option>
+      <option value="K501">K501</option>
+      <option value="J504">J504</option>
+      <!-- Agrega más opciones aquí si es necesario -->
+    </select>
+    <div class="error-msg">Seleccione un apartamento.</div>
+  </div>
+  <div class="field">
+    <label for="residente-pass">Contraseña:</label>
+    <input type="password" id="residente-pass" required placeholder="****" />
+    <div class="error-msg">Contraseña incorrecta.</div>
+  </div>
+  <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+</form>
       <!-- Checkbox de aceptación de política de datos -->
       <div class="checkbox-container">
         <input type="checkbox" id="acepto-politica" required />
@@ -348,5 +343,61 @@
       }
     });
   </script>
+  <script>
+  const btnResidente = document.getElementById('btn-residente');
+  const btnAdmin = document.getElementById('btn-admin');
+  const choice = document.getElementById('choice');
+  const adminLogin = document.getElementById('admin-login');
+  const residenteLogin = document.getElementById('residente-login');
+
+  const successMsg = document.getElementById('success');
+
+  const aptPasswords = {
+    "K502": "1538",
+    "K501": "1950",
+    "J504": "1924",
+    // Agrega el resto aquí...
+  };
+
+  btnResidente.addEventListener('click', () => {
+    choice.classList.add('hidden');
+    residenteLogin.classList.remove('hidden');
+  });
+
+  btnAdmin.addEventListener('click', () => {
+    choice.classList.add('hidden');
+    adminLogin.classList.remove('hidden');
+  });
+
+  residenteLogin.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const apto = document.getElementById('residente-apt').value.trim();
+    const clave = document.getElementById('residente-pass').value.trim();
+
+    const errorMsgs = residenteLogin.querySelectorAll('.error-msg');
+    errorMsgs.forEach(el => el.style.visibility = 'hidden');
+
+    if (!apto || !clave) {
+      if (!apto) {
+        errorMsgs[0].style.visibility = 'visible';
+      }
+      if (!clave) {
+        errorMsgs[1].textContent = 'Ingrese la contraseña.';
+        errorMsgs[1].style.visibility = 'visible';
+      }
+      return;
+    }
+
+    if (aptPasswords[apto] === clave) {
+      residenteLogin.classList.add('hidden');
+      successMsg.style.display = 'block';
+      successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Bienvenido residente del apartamento ${apto}`;
+    } else {
+      errorMsgs[1].textContent = 'Contraseña incorrecta.';
+      errorMsgs[1].style.visibility = 'visible';
+    }
+  });
+</script>
 </body>
 </html>
