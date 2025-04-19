@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Demo Acceso Zona Húmeda</title>
+<style>
+body { font-family: Arial, sans-serif; margin:20px; }
+nav { margin-bottom: 20px; }
+nav a { margin-right: 10px; text-decoration: none; color: blue; }
+.section { display: none; }
+.section.active { display: block; }
+label { display: block; margin-top: 8px;}
+input[type="text"], input[type="password"], input[type="email"], input[type="date"], select { width: 200px; padding: 5px;}
+button { margin-top: 10px; padding: 5px 10px;}
+</style>
+<script>
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.onload = function() { showSection('login'); };
+
+function login() {
+  showSection('home');
+}
+function viewReservations() {
+  showSection('reserva');
+}
+function viewProfile() {
+  showSection('perfil');
+}
+function goHome() {
+  showSection('home');
+}
+</script>
+</head>
+<body>
+<nav>
+<a href="#" onclick="showSection('login');">Login</a>
+<a href="#" onclick="showSection('home');">Home</a>
+<a href="#" onclick="showSection('reserva');">Reservar</a>
+<a href="#" onclick="showSection('perfil');">Perfil</a>
+</nav>
+
+<div id="login" class="section">
+  <h2>Inicio de Sesión</h2>
+  <label>Email:</label><input type="email" id="email"><br>
+  <label>Contraseña:</label><input type="password" id="password"><br>
+  <button onclick="login();">Ingresar</button>
+</div>
+
+<div id="home" class="section">
+  <h2>Home</h2>
+  <p>Hola, [Nombre]</p>
+  <p>Estado cartera: <span style="color:green">Paz y salvo</span></p>
+  <button onclick="viewReservations();">Reservar Turno Piscina</button>
+</div>
+
+<div id="reserva" class="section">
+  <h2>Reserva de Turno</h2>
+  <label>Fecha:</label><input type="date"><br>
+  <label>Hora:</label>
+  <select>
+    <option>08:00 - 09:00</option>
+    <option>09:00 - 10:00</option>
+    <option>10:00 - 11:00</option>
+  </select><br>
+  <button>Confirmar Reserva</button>
+  <button onclick="goHome();">Cancelar</button>
+</div>
+
+<div id="perfil" class="section">
+  <h2>Mi Perfil</h2>
+  <label>Nombre:</label><input type="text" value="[Nombre]" disabled><br>
+  <label>Apartamento:</label><input type="text" value="[Apto]" disabled><br>
+  <button onclick="goHome();">Cerrar sesión</button>
+</div>
+
+</body>
+</html>
