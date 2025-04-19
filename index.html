@@ -48,22 +48,6 @@
       <button id="btn-admin" type="button"><i class="fas fa-user-shield"></i> Administrador</button>
     </div>
 
-    <!-- Login Residente -->
-    <form id="residente-login" class="hidden" novalidate>
-      <h1><i class="fas fa-user"></i> Acceso Residente</h1>
-      <div class="field">
-        <label for="apt-number">Apartamento:</label>
-        <input type="text" id="apt-number" required placeholder="Ej: A101" />
-        <div class="error-msg" id="apt-error">Apartamento inválido.</div>
-      </div>
-      <div class="field">
-        <label for="apt-pass">Contraseña:</label>
-        <input type="password" id="apt-pass" required placeholder="****" />
-        <div class="error-msg" id="pass-error">Contraseña incorrecta.</div>
-      </div>
-      <button type="submit"><i class="fas fa-sign-in-alt"></i> Entrar</button>
-    </form>
-
     <!-- Login Admin -->
     <form id="admin-login" class="hidden" novalidate>
       <h1><i class="fas fa-user-shield"></i> Login Admin</h1>
@@ -117,6 +101,8 @@
         </select>
         <div class="error-msg">Selecciona apartamento.</div>
       </div>
+      
+      <!-- Checkbox de aceptación de política de datos -->
       <div class="checkbox-container">
         <input type="checkbox" id="acepto-politica" required />
         <label for="acepto-politica">
@@ -124,6 +110,7 @@
         </label>
       </div>
       <div class="error-msg" id="politica-error">Debes aceptar la política de tratamiento de datos.</div>
+      
       <button type="submit"><i class="fas fa-check-circle"></i> Registrar y Continuar</button>
     </form>
 
@@ -138,7 +125,22 @@
     <div id="reglamento" class="hidden">
       <h1><i class="fas fa-book"></i> Reglamento Piscina</h1>
       <ul class="reglamento-list">
-        <!-- items... -->
+        <li>1. El uso de la piscina y demás servicios que ofrece la copropiedad es de preferencia para uso de copropietarios y arrendatarios.</li>
+        <li>2. La piscina solo estará disponible de 8:00 am a 9:00 pm.</li>
+        <li>3. Los niños menores de 12 años deben estar acompañados de sus padres o un adulto responsable delegado por ellos. Cualquier accidente que se produzca, será de responsabilidad exclusiva de los padres del menor.</li>
+        <li>4. No habrá servicio de piscina el día lunes a causa del mantenimiento necesario, o el día hábil siguiente si éste ha sido festivo; o en casos excepcionales donde se presente un detrimento o contaminación durante el tiempo que sea necesario para su recuperación.</li>
+        <li>5. Para el uso piscina solo debe usarse prendas apropiadas (traje de baño, prendas en lícra, pantalonetas impermeables y gorros). Es importante que no se use prendas de algodón Los bebes o personas que no tengan control de esfínteres deberán usar pañales especiales para dicha actividad, con el fin de regular la higiene y mantenimiento del agua.</li>
+        <li>6. Para conservar la piscina en óptimas condiciones los residentes deberán utilizar la ducha antes de su ingreso, evitar el uso de aceites y productos dentro de la piscina e ingresar en condiciones de higiene adecuadas para su uso.</li>
+        <li>7. Las personas que tengan enfermedades cutáneas, heridas profundas o problemas de tipo sanguíneo y enfermedades infectocontagiosas deben abstenerse de utilizar la piscina y las zonas húmedas.</li>
+        <li>8. La zona de piscina tendrá un número razonable de invitados para cada apartamento de 2 personas y este es responsable del comportamiento de sus invitados.</li>
+        <li>9. No se permite ingerir licor ni consumir sustancias psicoactivas en la zona de piscina y salón social. Las personas en estado de embriaguez, serán retiradas de la misma con el fin de prevenir accidentes.</li>
+        <li>10. Está prohibido la presencia de animales en la piscina y salón social.</li>
+        <li>11. Por seguridad se prohíbe rotundamente, el consumo de bebidas en envase de vidrios y similares. Tampoco la circulación por los alrededores de la piscina en bicicleta, triciclo, patines o similares con el fin de evitar accidentes.</li>
+        <li>12. El uso moderado de equipos y radios en la zona de piscina solo se permite hasta la hora de servicio de la misma, cumpliendo con las normas establecidas en el código de policía y ambiental. Por seguridad no se permite realizar conexiones de los mencionados equipos o extensiones eléctricas sobre la zona dura perimetral de la piscina.</li>
+        <li>13. No se permiten juegos en la piscina con piedras u objetos duros ni balones de cuero ni artículos que no sean apropiados para la piscina.</li>
+        <li>14. Se prohíbe, en las zonas alrededor de la piscina o similares, efectuar asados o fogatas, que provoquen incendios o daños a las zonas verdes de la copropiedad.</li>
+        <li>15. La piscina solo puede ser utilizada siempre y cuando el estado del clima sea óptimo y no ponga en peligro la vida de un residente de la copropiedad. Los implementos de salvamento no son de uso recreativo, dentro o fuera de la piscina.</li>
+        <li>16. Por medidas de seguridad y buen comportamiento se prohíbe el ingreso al ascensor de personas que recién salen de la piscina sin haberse secado adecuadamente.</li>
       </ul>
       <button id="close-reglamento" type="button">Cerrar</button>
     </div>
@@ -181,7 +183,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const choice = document.getElementById('choice');
-      const loginResidente = document.getElementById('residente-login');
       const adminLogin = document.getElementById('admin-login');
       const adminPanel = document.getElementById('admin-panel');
       const regForm = document.getElementById('form-registro');
@@ -196,25 +197,11 @@
       const aceptoPolitica = document.getElementById('acepto-politica');
       const politicaError = document.getElementById('politica-error');
       const politicaLink = document.getElementById('politica-link');
+      let currentApartamento = '';
 
       // Elección de rol
-      document.getElementById('btn-residente').onclick = () => { choice.classList.add('hidden'); loginResidente.classList.remove('hidden'); };
+      document.getElementById('btn-residente').onclick = () => { choice.classList.add('hidden'); regForm.classList.remove('hidden'); };
       document.getElementById('btn-admin').onclick = () => { choice.classList.add('hidden'); adminLogin.classList.remove('hidden'); };
-
-      // Validación apto
-      const passByApt = { /* tabla de apartamentos y contraseñas */ "A101":"1543", /* ... */ "K502":"1538" };
-
-      loginResidente.addEventListener('submit', e => {
-        e.preventDefault();
-        const apt = document.getElementById('apt-number').value.trim().toUpperCase();
-        const pass = document.getElementById('apt-pass').value.trim();
-        const aptError = document.getElementById('apt-error');
-        const passError = document.getElementById('pass-error');
-        if (!passByApt[apt]) { aptError.style.visibility='visible'; passError.style.visibility='hidden'; return; }
-        if (passByApt[apt]!==pass) { aptError.style.visibility='hidden'; passError.style.visibility='visible'; return; }
-        aptError.style.visibility='hidden'; passError.style.visibility='hidden';
-        loginResidente.classList.add('hidden'); regForm.classList.remove('hidden');
-      });
 
       // Login Admin
       adminLogin.addEventListener('submit', e => {
