@@ -125,22 +125,22 @@
     <div id="reglamento" class="hidden">
       <h1><i class="fas fa-book"></i> Reglamento Piscina</h1>
       <ul class="reglamento-list">
-        <li>1. Uso preferencial para copropietarios y arrendatarios.</li>
-        <li>2. Disponible de 8:00 am a 9:00 pm.</li>
-        <li>3. Niños menores de 12 años acompañados de un adulto responsable.</li>
-        <li>4. No hay servicio los lunes o día hábil siguiente por mantenimiento.</li>
-        <li>5. Prendas apropiadas (traje de baño, licra, pantalonetas impermeables, gorros).</li>
-        <li>6. Uso de ducha antes de ingresar y evitar aceites.</li>
-        <li>7. Personas con enfermedades cutáneas o infectocontagiosas deben abstenerse.</li>
-        <li>8. Máximo 2 invitados por apartamento; responsable su comportamiento.</li>
-        <li>9. Prohibido consumir licor o psicoactivos.</li>
-        <li>10. Prohibido animales.</li>
-        <li>11. No bebidas en envase de vidrio; no bicicletas ni patines.</li>
-        <li>12. Uso moderado de equipos de audio; sin extensiones eléctricas perimetrales.</li>
-        <li>13. No juegos con piedras, objetos duros, balones de cuero.</li>
-        <li>14. Prohibido asados o fogatas cerca de piscina.</li>
-        <li>15. Uso solo en condiciones climáticas seguras; implementos de salvamento no recreativos.</li>
-        <li>16. Prohibido ingresar al ascensor sin secarse adecuadamente.</li>
+        <li>1. El uso de la piscina y demás servicios que ofrece la copropiedad es de preferencia para uso de copropietarios y arrendatarios.</li>
+        <li>2. La piscina solo estará disponible de 8:00 am a 9:00 pm.</li>
+        <li>3. Los niños menores de 12 años deben estar acompañados de sus padres o un adulto responsable delegado por ellos. Cualquier accidente que se produzca, será de responsabilidad exclusiva de los padres del menor.</li>
+        <li>4. No habrá servicio de piscina el día lunes a causa del mantenimiento necesario, o el día hábil siguiente si éste ha sido festivo; o en casos excepcionales donde se presente un detrimento o contaminación durante el tiempo que sea necesario para su recuperación.</li>
+        <li>5. Para el uso piscina solo debe usarse prendas apropiadas (traje de baño, prendas en lícra, pantalonetas impermeables y gorros). Es importante que no se use prendas de algodón Los bebes o personas que no tengan control de esfínteres deberán usar pañales especiales para dicha actividad, con el fin de regular la higiene y mantenimiento del agua.</li>
+        <li>6. Para conservar la piscina en óptimas condiciones los residentes deberán utilizar la ducha antes de su ingreso, evitar el uso de aceites y productos dentro de la piscina e ingresar en condiciones de higiene adecuadas para su uso.</li>
+        <li>7. Las personas que tengan enfermedades cutáneas, heridas profundas o problemas de tipo sanguíneo y enfermedades infectocontagiosas deben abstenerse de utilizar la piscina y las zonas húmedas.</li>
+        <li>8. La zona de piscina tendrá un número razonable de invitados para cada apartamento de 2 personas y este es responsable del comportamiento de sus invitados.</li>
+        <li>9. No se permite ingerir licor ni consumir sustancias psicoactivas en la zona de piscina y salón social. Las personas en estado de embriaguez, serán retiradas de la misma con el fin de prevenir accidentes.</li>
+        <li>10. Está prohibido la presencia de animales en la piscina y salón social.</li>
+        <li>11. Por seguridad se prohíbe rotundamente, el consumo de bebidas en envase de vidrios y similares. Tampoco la circulación por los alrededores de la piscina en bicicleta, triciclo, patines o similares con el fin de evitar accidentes.</li>
+        <li>12. El uso moderado de equipos y radios en la zona de piscina solo se permite hasta la hora de servicio de la misma, cumpliendo con las normas establecidas en el código de policía y ambiental. Por seguridad no se permite realizar conexiones de los mencionados equipos o extensiones eléctricas sobre la zona dura perimetral de la piscina.</li>
+        <li>13. No se permiten juegos en la piscina con piedras u objetos duros ni balones de cuero ni artículos que no sean apropiados para la piscina.</li>
+        <li>14. Se prohíbe, en las zonas alrededor de la piscina o similares, efectuar asados o fogatas, que provoquen incendios o daños a las zonas verdes de la copropiedad.</li>
+        <li>15. La piscina solo puede ser utilizada siempre y cuando el estado del clima sea óptimo y no ponga en peligro la vida de un residente de la copropiedad. Los implementos de salvamento no son de uso recreativo, dentro o fuera de la piscina.</li>
+        <li>16. Por medidas de seguridad y buen comportamiento se prohíbe el ingreso al ascensor de personas que recién salen de la piscina sin haberse secado adecuadamente.</li>
       </ul>
       <button id="close-reglamento" type="button">Cerrar</button>
     </div>
@@ -161,6 +161,16 @@
           <option>08:00-09:00</option>
           <option>09:00-10:00</option>
           <option>10:00-11:00</option>
+          <option>11:00-12:00</option>
+          <option>12:00-13:00</option>
+          <option>13:00-14:00</option>
+          <option>14:00-15:00</option>
+          <option>15:00-16:00</option>
+          <option>16:00-17:00</option>
+          <option>17:00-18:00</option>
+          <option>18:00-19:00</option>
+          <option>19:00-20:00</option>
+          <option>20:00-21:00</option>
         </select>
         <div class="error-msg">Selecciona hora.</div>
       </div>
@@ -198,7 +208,7 @@
         e.preventDefault();
         const user = document.getElementById('admin-user').value;
         const pass = document.getElementById('admin-pass').value;
-        if (user==='administrador' && pass==='Olga_3752') {
+        if (user==='administrador' && pass==='Olga_4650') {
           adminLogin.classList.add('hidden'); adminPanel.classList.remove('hidden');
         } else alert('Credenciales incorrectas.');
       });
