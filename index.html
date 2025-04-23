@@ -391,17 +391,21 @@ if (contraseñaIngresada !== contraseñaEsperada) {
       }
       
       function downloadReservas(){ 
-        const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
-        let csv='Nombre,Apto,Fecha,Hora\n';
-        reservas.forEach(r=> csv+=`${r.nombre},${r.apartamento},${r.fecha},${r.hora}\n`);
-        const blob=new Blob([csv],{type:'text/csv'}); 
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a'); 
-        a.href=url; 
-        a.download='reservas_piscina.csv'; 
-        a.click(); 
-        URL.revokeObjectURL(url);
-      }
+  const reservas = JSON.parse(localStorage.getItem('reservas') || '[]'); 
+  let csv = 'Nombre,Apto,Invitados,Fecha,Hora\n';
+  reservas.forEach(r => {
+    const invitados = r.invitados ? r.invitados.replace(/,/g, ';') : '';
+    csv += `${r.nombre},${r.apartamento},${invitados},${r.fecha},${r.hora}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv' }); 
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href = url; 
+  a.download = 'reservas_piscina.csv'; 
+  a.click(); 
+  URL.revokeObjectURL(url);
+}
+
     });
   </script>
 </body>
