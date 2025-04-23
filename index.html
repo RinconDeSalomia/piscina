@@ -294,39 +294,19 @@
           alert('No puedes reservar: estás en lista de morosos.'); 
           return; 
         }
-        // Registro Residente
-regForm.addEventListener('submit', e => {
-  e.preventDefault(); 
-  if (!validate(regForm)) return;
+        // 🚨 Validación de contraseña por apartamento
+const contraseñaEsperada = contraseñasPorApartamento[apartamento];
+if (!contraseñaEsperada) {
+  alert('Apartamento no tiene contraseña registrada. Contacta a la administración.');
+  return;
+}
 
-  const nombre = document.getElementById('nombre').value;
-  const apartamento = document.getElementById('apartamento').value; 
-  currentApartamento = apartamento;
+const contraseñaIngresada = prompt(`Ingresa la contraseña del apartamento ${apartamento}:`);
+if (contraseñaIngresada !== contraseñaEsperada) {
+  alert('Contraseña incorrecta. No puedes continuar.');
+  return;
+}
 
-  const morosos = JSON.parse(localStorage.getItem('morosos') || '[]'); 
-  if (morosos.includes(apartamento)) { 
-    alert('No puedes reservar: estás en lista de morosos.'); 
-    return; 
-  }
-
-  // 🚨 Validación de contraseña por apartamento
-  const contraseñaEsperada = contraseñasPorApartamento[apartamento];
-  if (!contraseñaEsperada) {
-    alert('Apartamento no registrado para validación. Contacta a la administración.');
-    return;
-  }
-
-  const contraseñaIngresada = prompt(`Ingresa la contraseña para el apartamento ${apartamento}:`);
-  if (contraseñaIngresada !== contraseñaEsperada) {
-    alert('Contraseña incorrecta. No se puede continuar.');
-    return;
-  }
-
-  regForm.classList.add('hidden'); 
-  showMisReservas(apartamento); 
-  resForm.classList.remove('hidden');
-  localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
-});
         regForm.classList.add('hidden'); 
         showMisReservas(apartamento); 
         resForm.classList.remove('hidden');
