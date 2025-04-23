@@ -77,6 +77,7 @@
     </div>
 
     <!-- Registro Residente -->
+    
     <form id="form-registro" class="hidden" novalidate>
       <h1><i class="fas fa-user-edit"></i> Registro Usuario</h1>
       <div class="field">
@@ -101,6 +102,12 @@
         </select>
         <div class="error-msg">Selecciona apartamento.</div>
       </div>
+      <div class="field">
+  <label for="invitados">Invitados (máx. 2 nombres, opcional):</label>
+  <input type="text" id="invitados" placeholder="Ej: Juan Torres, Maria Gómez" />
+  <div class="error-msg" id="invitados-error">Solo puedes ingresar hasta 2 nombres.</div>
+</div>
+
       
       <!-- Checkbox de aceptación de política de datos -->
       <div class="checkbox-container">
@@ -294,6 +301,22 @@
           alert('No puedes reservar: estás en lista de morosos.'); 
           return; 
         }
+        const invitados = document.getElementById('invitados').value.trim();
+const invitadosError = document.getElementById('invitados-error');
+
+// Validar máximo 2 invitados si se escribe algo
+if (invitados) {
+  const lista = invitados.split(',').map(s => s.trim()).filter(s => s);
+  if (lista.length > 2) {
+    invitadosError.style.visibility = 'visible';
+    return;
+  } else {
+    invitadosError.style.visibility = 'hidden';
+  }
+} else {
+  invitadosError.style.visibility = 'hidden';
+}
+
         // 🚨 Validación de contraseña por apartamento
 const contraseñaEsperada = contraseñasPorApartamento[apartamento];
 if (!contraseñaEsperada) {
@@ -310,7 +333,15 @@ if (contraseñaIngresada !== contraseñaEsperada) {
         regForm.classList.add('hidden'); 
         showMisReservas(apartamento); 
         resForm.classList.remove('hidden');
-        localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
+        localStorage.setItem('currentReserva', JSON.stringify({
+  nombre,
+  apartamento,
+  invitados,
+  fecha: '',
+  hora: ''
+}));
+
+
       });
 
       // Mostrar política de datos al hacer clic en el enlace
@@ -351,7 +382,8 @@ if (contraseñaIngresada !== contraseñaEsperada) {
         const reservas=JSON.parse(localStorage.getItem('reservas')||'[]'); 
         const c=document.getElementById('reservas-list');
         if(!reservas.length) c.innerHTML='<p>No hay reservas.</p>'; else{ 
-          let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+          let html='<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+
           reservas.forEach(r=> html+=`<tr><td>${r.nombre}</td><td>${r.apartamento}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`);
           c.innerHTML=html+'</tbody></table>'; 
         } 
