@@ -179,7 +179,18 @@
 
     <div class="footer">El acceso está permitido solo a residentes autorizados.</div>
   </div>
-
+const contraseñasPorApartamento = {
+  "A101": "1543", "A102": "1361", "A103": "1294", "A104": "1538",
+  "A201": "1745", "A202": "1649", "A203": "1296", "A204": "1156",
+  "A301": "1180", "A302": "1760", "A303": "1638", "A304": "1813",
+  "A401": "1488", "A402": "1813", "A403": "1473", "A404": "1247",
+  "A501": "1947", "A502": "1504", "A503": "1648", "A504": "1257",
+  "B101": "1458", "B102": "1940", "B103": "1896", "B104": "1836",
+  "B201": "1828", "B202": "1506", "B203": "1633", "B204": "1168",
+  "B301": "1890", "B302": "1650", "B303": "1439", "B304": "1927",
+  "B401": "1559", "B402": "1957", "B403": "1864", "B404": "1050",
+  "B501": "1025", "B502": "1837", "B503": "xxxx" // añade los que falten
+};
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const choice = document.getElementById('choice');
@@ -282,7 +293,39 @@
           alert('No puedes reservar: estás en lista de morosos.'); 
           return; 
         }
-        
+        // Registro Residente
+regForm.addEventListener('submit', e => {
+  e.preventDefault(); 
+  if (!validate(regForm)) return;
+
+  const nombre = document.getElementById('nombre').value;
+  const apartamento = document.getElementById('apartamento').value; 
+  currentApartamento = apartamento;
+
+  const morosos = JSON.parse(localStorage.getItem('morosos') || '[]'); 
+  if (morosos.includes(apartamento)) { 
+    alert('No puedes reservar: estás en lista de morosos.'); 
+    return; 
+  }
+
+  // 🚨 Validación de contraseña por apartamento
+  const contraseñaEsperada = contraseñasPorApartamento[apartamento];
+  if (!contraseñaEsperada) {
+    alert('Apartamento no registrado para validación. Contacta a la administración.');
+    return;
+  }
+
+  const contraseñaIngresada = prompt(`Ingresa la contraseña para el apartamento ${apartamento}:`);
+  if (contraseñaIngresada !== contraseñaEsperada) {
+    alert('Contraseña incorrecta. No se puede continuar.');
+    return;
+  }
+
+  regForm.classList.add('hidden'); 
+  showMisReservas(apartamento); 
+  resForm.classList.remove('hidden');
+  localStorage.setItem('currentReserva', JSON.stringify({nombre, apartamento, fecha:'', hora:''}));
+});
         regForm.classList.add('hidden'); 
         showMisReservas(apartamento); 
         resForm.classList.remove('hidden');
