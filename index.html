@@ -12,6 +12,9 @@
     body { margin:0; padding:0; font-family:'Roboto',sans-serif; background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100vh; color:var(--text); }
     .container { background:var(--white); padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; transition:transform 0.3s ease; }
     .container:focus-within { transform:scale(1.02); }
+    /* Modo admin ancho */
+    .container.wide { width: 960px; }
+
     h1 { margin-bottom:1rem; font-size:1.5rem; color:var(--primary); text-align:center; }
     label { display:block; margin:0.75rem 0 0.25rem; font-weight:500; }
     input, select, button, textarea { width:100%; font-size:1rem; }
@@ -22,9 +25,17 @@
     .error input, .error select { border-color:var(--error); box-shadow:0 0 0 3px rgba(230,57,70,0.1); }
     .hidden { display:none !important; }
     .footer { margin-top:1rem; font-size:0.8rem; color:#64748b; text-align:center; }
-    table { width:100%; border-collapse:collapse; margin-top:1rem; }
+
+    table { width:100%; border-collapse:collapse; margin-top:1rem; min-width:700px; }
     th, td { border:1px solid #e2e8f0; padding:0.5rem; text-align:center; font-size:0.9rem; }
     th { background:#f8fafc; }
+
+    /* contenedores de tablas con scroll */
+    #reservas-list, #usuarios-list {
+      margin-top: 1rem;
+      overflow-x: auto;
+    }
+
     .reglamento-list { text-align:left; margin-top:1rem; max-height:200px; overflow-y:auto; }
     .reglamento-list li { margin-bottom:0.5rem; }
     .checkbox-container { display:flex; align-items:flex-start; margin:1rem 0; }
@@ -88,9 +99,18 @@
       <p>Pega los apartamentos (ej: F101,F102) separados por comas:</p>
       <textarea id="morosos-input" rows="3" placeholder="A101,B202,C303"></textarea>
       <button id="save-morosos" type="button"><i class="fas fa-save"></i> Guardar Listado</button>
+
+      <!-- NUEVOS BOTONES ADMIN -->
+      <button id="view-usuarios" type="button"><i class="fas fa-users"></i> Ver Usuarios</button>
+      <button id="download-usuarios" type="button"><i class="fas fa-download"></i> Descargar Usuarios CSV</button>
+
       <button id="view-reservas" type="button"><i class="fas fa-list"></i> Ver Reservas</button>
       <button id="download-reservas" type="button"><i class="fas fa-download"></i> Descargar CSV</button>
+
       <div id="reservas-list" class="hidden"></div>
+      <!-- NUEVO CONTENEDOR USUARIOS -->
+      <div id="usuarios-list" class="hidden"></div>
+
       <div class="footer">Los morosos no podrán reservar.</div>
     </div>
 
@@ -238,6 +258,7 @@
       const politicaLink = document.getElementById('politica-link');
       const toast = document.getElementById('toast');
       const toastDetails = document.getElementById('toast-details');
+      const container = document.querySelector('.container'); // para modo wide admin
 
       let currentApartamento = '';
 
@@ -251,7 +272,9 @@
         const user = document.getElementById('admin-user').value.trim();
         const pass = document.getElementById('admin-pass').value.trim();
         if (user === 'administrador' && pass === 'Olga_4650') {
-          adminLogin.classList.add('hidden'); adminPanel.classList.remove('hidden');
+          adminLogin.classList.add('hidden');
+          adminPanel.classList.remove('hidden');
+          container.classList.add('wide'); // modo ancho en panel admin
         } else {
           alert('Credenciales incorrectas.');
         }
@@ -264,9 +287,11 @@
         alert('Lista de morosos actualizada.');
       };
 
-      // Admin reservas
+      // Eventos admin (ver/descargar)
       document.getElementById('view-reservas').onclick = viewAdminReservas;
       document.getElementById('download-reservas').onclick = downloadReservas;
+      document.getElementById('view-usuarios').onclick = viewAdminUsuarios;
+      document.getElementById('download-usuarios').onclick = downloadUsuarios;
 
       // Mostrar reglamento en reserva
       btnVerReg.addEventListener('click', () => { resForm.classList.add('hidden'); reglamentoDiv.classList.remove('hidden'); });
@@ -359,6 +384,17 @@
           return;
         }
 
+        // ===== Registrar/actualizar lista de usuarios (independiente de reservas) =====
+        let usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+        const idx = usuarios.findIndex(u => u.apartamento === apartamento);
+        if (idx >= 0) {
+          usuarios[idx] = { ...usuarios[idx], nombre, invitados, registroAt: usuarios[idx].registroAt || new Date().toISOString() };
+        } else {
+          usuarios.push({ nombre, apartamento, invitados, registroAt: new Date().toISOString() });
+        }
+        localStorage.setItem('usuarios', JSON.stringify(usuarios));
+        // ==============================================================================
+
         // Guardar datos base de la reserva en curso
         localStorage.setItem('currentReserva', JSON.stringify({ nombre, apartamento, invitados, fecha:'', hora:'' }));
 
@@ -420,12 +456,11 @@ Los datos no serán compartidos con terceros sin autorización previa. Puede eje
         reservas.push(reserva);
         localStorage.setItem('reservas', JSON.stringify(reservas));
 
-        // Banner opcional arriba
-        successBox.textContent = `LA RESERVA SE COMPLETÓ DE MANERA SATISFACTORIA`;
-        successBox.textContent = `RECUERDE TENER ROPA DE LICRA Y SU RESPECTIVO GORRO DE PISCINA`;
+        // Banner arriba (corregido: un solo texto)
+        successBox.textContent = `LA RESERVA SE COMPLETÓ DE MANERA SATISFACTORIA · RECUERDE TENER ROPA DE LICRA Y GORRO DE PISCINA`;
         successBox.style.display = 'block';
 
-        // Toast bonito con detalles
+        // Toast con detalles
         toastDetails.textContent = `${reserva.nombre} · Apto ${reserva.apartamento} · ${reserva.fecha} · ${reserva.hora}`;
         toast.classList.add('show');
 
@@ -437,6 +472,9 @@ Los datos no serán compartidos con terceros sin autorización previa. Puede eje
       function viewAdminReservas() {
         const reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
         const c = document.getElementById('reservas-list');
+        // Oculta usuarios si estuvieran abiertos
+        document.getElementById('usuarios-list').classList.add('hidden');
+
         if (!reservas.length) {
           c.innerHTML = '<p>No hay reservas.</p>';
         } else {
@@ -450,18 +488,69 @@ Los datos no serán compartidos con terceros sin autorización previa. Puede eje
         c.classList.remove('hidden');
       }
 
-      // Admin: descargar CSV
+      // Admin: ver usuarios
+      function viewAdminUsuarios() {
+        const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+        const c = document.getElementById('usuarios-list');
+        // Oculta reservas si estuvieran abiertas
+        document.getElementById('reservas-list').classList.add('hidden');
+
+        if (!usuarios.length) {
+          c.innerHTML = '<p>No hay usuarios registrados.</p>';
+        } else {
+          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Registrado</th></tr></thead><tbody>';
+          usuarios.forEach(u => {
+            const fecha = u.registroAt ? new Date(u.registroAt).toLocaleString() : '';
+            html += `<tr><td>${u.nombre || ''}</td><td>${u.apartamento}</td><td>${u.invitados || ''}</td><td>${fecha}</td></tr>`;
+          });
+          html += '</tbody></table>';
+          c.innerHTML = html;
+        }
+        c.classList.remove('hidden');
+      }
+
+      // Admin: descargar CSV reservas (robusto)
       function downloadReservas() {
         const reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
-        let csv = 'Nombre,Apto,Invitados,Fecha,Hora\n';
+        if (!reservas.length) { alert('No hay reservas para descargar.'); return; }
+
+        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`; // CSV escape
+        let csv = 'Nombre,Apto,Invitados,Fecha,Hora\r\n';
         reservas.forEach(r => {
           const inv = r.invitados ? r.invitados.replace(/,/g, ';') : '';
-          csv += `${(r.nombre||'')},${r.apartamento},${inv},${r.fecha},${r.hora}\n`;
+          csv += [esc(r.nombre || ''), esc(r.apartamento), esc(inv), esc(r.fecha), esc(r.hora)].join(',') + '\r\n';
         });
-        const blob = new Blob([csv], { type: 'text/csv' });
+
+        const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = 'reservas_piscina.csv'; a.click();
+        a.href = url; a.download = 'reservas_piscina.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // Admin: descargar CSV usuarios (nuevo)
+      function downloadUsuarios() {
+        const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+        if (!usuarios.length) { alert('No hay usuarios para descargar.'); return; }
+
+        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+        let csv = 'Nombre,Apto,Invitados,Registrado\r\n';
+        usuarios.forEach(u => {
+          const inv = u.invitados ? u.invitados.replace(/,/g, ';') : '';
+          const fecha = u.registroAt ? new Date(u.registroAt).toISOString() : '';
+          csv += [esc(u.nombre || ''), esc(u.apartamento), esc(inv), esc(fecha)].join(',') + '\r\n';
+        });
+
+        const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'usuarios_registrados.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
     });
