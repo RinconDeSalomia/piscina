@@ -12,9 +12,7 @@
     body { margin:0; padding:0; font-family:'Roboto',sans-serif; background:var(--bg); display:flex; justify-content:center; align-items:center; min-height:100vh; color:var(--text); }
     .container { background:var(--white); padding:2rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); width:360px; transition:transform 0.3s ease; }
     .container:focus-within { transform:scale(1.02); }
-    /* Modo admin ancho */
     .container.wide { width: 960px; }
-
     h1 { margin-bottom:1rem; font-size:1.5rem; color:var(--primary); text-align:center; }
     label { display:block; margin:0.75rem 0 0.25rem; font-weight:500; }
     input, select, button, textarea { width:100%; font-size:1rem; }
@@ -30,11 +28,7 @@
     th, td { border:1px solid #e2e8f0; padding:0.5rem; text-align:center; font-size:0.9rem; }
     th { background:#f8fafc; }
 
-    /* contenedores de tablas con scroll */
-    #reservas-list, #usuarios-list {
-      margin-top: 1rem;
-      overflow-x: auto;
-    }
+    #reservas-list, #usuarios-list { margin-top:1rem; overflow-x:auto; }
 
     .reglamento-list { text-align:left; margin-top:1rem; max-height:200px; overflow-y:auto; }
     .reglamento-list li { margin-bottom:0.5rem; }
@@ -44,7 +38,6 @@
     .checkbox-container a { color:var(--primary); text-decoration:none; }
     .checkbox-container a:hover { text-decoration:underline; }
 
-    /* Toast de éxito */
     .toast {
       position: fixed; inset: auto 16px 16px 16px;
       display: none; background: #0f766e; color: #ecfeff;
@@ -58,11 +51,9 @@
     .toast .row i { margin-top:2px; }
     @keyframes fadein { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform: translateY(0);} }
 
-    /* Botón principal */
     button { margin-top:1.0rem; padding:0.75rem; border:none; border-radius:8px; background:var(--primary); color:var(--white); cursor:pointer; transition:background 0.2s, box-shadow 0.2s; }
     button:hover { background:var(--primary-dark); box-shadow:0 2px 8px rgba(0,0,0,0.15); }
 
-    /* Cinta superior de éxito (opcional) */
     .success-banner { display:none; text-align:center; padding:0.8rem; border-radius:8px; background:var(--success); color:var(--white); margin-bottom:1rem; }
   </style>
 </head>
@@ -100,7 +91,6 @@
       <textarea id="morosos-input" rows="3" placeholder="A101,B202,C303"></textarea>
       <button id="save-morosos" type="button"><i class="fas fa-save"></i> Guardar Listado</button>
 
-      <!-- NUEVOS BOTONES ADMIN -->
       <button id="view-usuarios" type="button"><i class="fas fa-users"></i> Ver Usuarios</button>
       <button id="download-usuarios" type="button"><i class="fas fa-download"></i> Descargar Usuarios CSV</button>
 
@@ -108,7 +98,6 @@
       <button id="download-reservas" type="button"><i class="fas fa-download"></i> Descargar CSV</button>
 
       <div id="reservas-list" class="hidden"></div>
-      <!-- NUEVO CONTENEDOR USUARIOS -->
       <div id="usuarios-list" class="hidden"></div>
 
       <div class="footer">Los morosos no podrán reservar.</div>
@@ -227,9 +216,8 @@
 
   <script>
   // ================== CONFIG REMOTA ==================
-  // 👇 ESTA ES LA URL QUE TE DA GOOGLE APP SCRIPT (termina en /exec)
-  const API_URL = "https://script.google.com/macros/s/AKfycbyPiF9-5-j61_CMLC_jkrbmKID_PhyLFTvNSK5tFtcMJ_vVY2rts1taWhDSWah10JxJ/exec";
-  const SECRET  = "RINCONDESALOMIA4650"; // tu secreto
+  const API_URL = "https://script.google.com/macros/s/AKfycbxZ-1234567890abcdefghiJKLMNOPQRSTUV/exec"; // <-- reemplaza por tu /exec real
+  const SECRET  = "RINCONDESALOMIA4650";
 
   async function apiPost(action, payload={}) {
     try {
@@ -241,7 +229,6 @@
       return await res.json();
     } catch (e) { return {ok:false, error:String(e)}; }
   }
-
   async function apiGet(action) {
     try {
       const url = `${API_URL}?action=${encodeURIComponent(action)}`;
@@ -250,334 +237,362 @@
     } catch (e) { return {ok:false, error:String(e)}; }
   }
 
-    const contraseñasPorApartamento = {
-      "A101":"1543","A102":"1361","A103":"1294","A104":"1538","A201":"1745","A202":"1649","A203":"1296","A204":"1156","A301":"1180","A302":"1760","A303":"1638","A304":"1813","A401":"1488","A402":"1813","A403":"1473","A404":"1247","A501":"1947","A502":"1504","A503":"1648","A504":"1257",
-      "B101":"1458","B102":"1940","B103":"1896","B104":"1836","B201":"1828","B202":"1506","B203":"1633","B204":"1168","B301":"1890","B302":"1650","B303":"1439","B304":"1927","B401":"1559","B402":"1957","B403":"1864","B404":"1050","B501":"1025","B502":"1837","B503":"1111","B504":"1000",
-      "C101":"1543","C102":"1361","C103":"1294","C104":"1538","C201":"1745","C202":"1649","C203":"1296","C204":"1156","C301":"1180","C302":"1760","C303":"1638","C304":"1813","C401":"1488","C402":"1813","C403":"1473","C404":"1247","C501":"1947","C502":"1504","C503":"1648","C504":"1257",
-      "D101":"1543","D102":"1361","D103":"1294","D104":"1538","D201":"1745","D202":"1649","D203":"1296","D204":"1156","D301":"1180","D302":"1760","D303":"1638","D304":"1813","D401":"1488","D402":"1813","D403":"1473","D404":"1247","D501":"1947","D502":"1504","D503":"1648","D504":"1257",
-      "E101":"1543","E102":"1361","E103":"1294","E104":"1538","E201":"1745","E202":"1649","E203":"1296","E204":"1156","E301":"1180","E302":"1760","E303":"1638","E304":"1813","E401":"1488","E402":"1813","E403":"1473","E404":"1247","E501":"1947","E502":"1504","E503":"1648","E504":"1257",
-      "F101":"1543","F102":"1361","F103":"1294","F104":"1538","F201":"1745","F202":"1649","F203":"1296","F204":"1156","F301":"1180","F302":"1760","F303":"1638","F304":"1813","F401":"1488","F402":"1813","F403":"1473","F404":"1247","F501":"1947","F502":"1504","F503":"1648","F504":"1257",
-      "G101":"1458","G102":"1940","G103":"1896","G104":"1836","G201":"1828","G202":"1506","G203":"1633","G204":"1168","G301":"1890","G302":"1650","G303":"1439","G304":"1927","G401":"1559","G402":"1957","G403":"1864","G404":"1050","G501":"1025","G502":"1837","G503":"1111","G504":"1000",
-      "H101":"1543","H102":"1361","H103":"1294","H104":"1538","H201":"1745","H202":"1649","H203":"1296","H204":"1156","H301":"1180","H302":"1760","H303":"1638","H304":"1813","H401":"1488","H402":"1813","H403":"1473","H404":"1247","H501":"1947","H502":"1504","H503":"1648","H504":"1257",
-      "I101":"1543","I102":"1361","I103":"1294","I104":"1538","I201":"1745","I202":"1649","I203":"1296","I204":"1156","I301":"1180","I302":"1760","I303":"1638","I304":"1813","I401":"1488","I402":"1813","I403":"1473","I404":"1247","I501":"1947","I502":"1504","I503":"1648","I504":"1257",
-      "J101":"1543","J102":"1361","J103":"1294","J104":"1538","J201":"1745","J202":"1649","J203":"1296","J204":"1156","J301":"1180","J302":"1760","J303":"1638","J304":"1813","J401":"1488","J402":"1813","J403":"1473","J404":"1247","J501":"1947","J502":"1504","J503":"1648","J504":"1257",
-      "K101":"1543","K102":"1361","K103":"1294","K104":"1538","K201":"1745","K202":"1649","K203":"1296","K204":"1156","K301":"1180","K302":"1760","K303":"1638","K304":"1813","K401":"1488","K402":"1813","K403":"1473","K404":"1247","K501":"1947","K502":"1504","K503":"1648","K504":"1257"
+  // ================== APP ==================
+  const contraseñasPorApartamento = {
+    "A101":"1543","A102":"1361","A103":"1294","A104":"1538","A201":"1745","A202":"1649","A203":"1296","A204":"1156","A301":"1180","A302":"1760","A303":"1638","A304":"1813","A401":"1488","A402":"1813","A403":"1473","A404":"1247","A501":"1947","A502":"1504","A503":"1648","A504":"1257",
+    "B101":"1458","B102":"1940","B103":"1896","B104":"1836","B201":"1828","B202":"1506","B203":"1633","B204":"1168","B301":"1890","B302":"1650","B303":"1439","B304":"1927","B401":"1559","B402":"1957","B403":"1864","B404":"1050","B501":"1025","B502":"1837","B503":"1111","B504":"1000",
+    "C101":"1543","C102":"1361","C103":"1294","C104":"1538","C201":"1745","C202":"1649","C203":"1296","C204":"1156","C301":"1180","C302":"1760","C303":"1638","C304":"1813","C401":"1488","C402":"1813","C403":"1473","C404":"1247","C501":"1947","C502":"1504","C503":"1648","C504":"1257",
+    "D101":"1543","D102":"1361","D103":"1294","D104":"1538","D201":"1745","D202":"1649","D203":"1296","D204":"1156","D301":"1180","D302":"1760","D303":"1638","D304":"1813","D401":"1488","D402":"1813","D403":"1473","D404":"1247","D501":"1947","D502":"1504","D503":"1648","D504":"1257",
+    "E101":"1543","E102":"1361","E103":"1294","E104":"1538","E201":"1745","E202":"1649","E203":"1296","E204":"1156","E301":"1180","E302":"1760","E303":"1638","E304":"1813","E401":"1488","E402":"1813","E403":"1473","E404":"1247","E501":"1947","E502":"1504","E503":"1648","E504":"1257",
+    "F101":"1543","F102":"1361","F103":"1294","F104":"1538","F201":"1745","F202":"1649","F203":"1296","F204":"1156","F301":"1180","F302":"1760","F303":"1638","F304":"1813","F401":"1488","F402":"1813","F403":"1473","F404":"1247","F501":"1947","F502":"1504","F503":"1648","F504":"1257",
+    "G101":"1458","G102":"1940","G103":"1896","G104":"1836","G201":"1828","G202":"1506","G203":"1633","G204":"1168","G301":"1890","G302":"1650","G303":"1439","G304":"1927","G401":"1559","G402":"1957","G403":"1864","G404":"1050","G501":"1025","G502":"1837","G503":"1111","G504":"1000",
+    "H101":"1543","H102":"1361","H103":"1294","H104":"1538","H201":"1745","H202":"1649","H203":"1296","H204":"1156","H301":"1180","H302":"1760","H303":"1638","H304":"1813","H401":"1488","H402":"1813","H403":"1473","H404":"1247","H501":"1947","H502":"1504","H503":"1648","H504":"1257",
+    "I101":"1543","I102":"1361","I103":"1294","I104":"1538","I201":"1745","I202":"1649","I203":"1296","I204":"1156","I301":"1180","I302":"1760","I303":"1638","I304":"1813","I401":"1488","I402":"1813","I403":"1473","I404":"1247","I501":"1947","I502":"1504","I503":"1648","I504":"1257",
+    "J101":"1543","J102":"1361","J103":"1294","J104":"1538","J201":"1745","J202":"1649","J203":"1296","J204":"1156","J301":"1180","J302":"1760","J303":"1638","J304":"1813","J401":"1488","J402":"1813","J403":"1473","J404":"1247","J501":"1947","J502":"1504","J503":"1648","J504":"1257",
+    "K101":"1543","K102":"1361","K103":"1294","K104":"1538","K201":"1745","K202":"1649","K203":"1296","K204":"1156","K301":"1180","K302":"1760","K303":"1638","K304":"1813","K401":"1488","K402":"1813","K403":"1473","K404":"1247","K501":"1947","K502":"1504","K503":"1648","K504":"1257"
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const choice = document.getElementById('choice');
+    const adminLogin = document.getElementById('admin-login');
+    const adminPanel = document.getElementById('admin-panel');
+    const regForm = document.getElementById('form-registro');
+    const resForm = document.getElementById('form-reserva');
+    const misReservasDiv = document.getElementById('mis-reservas');
+    const misReservasList = document.getElementById('mis-reservas-list');
+    const closeMis = document.getElementById('close-mis-reservas');
+    const reglamentoDiv = document.getElementById('reglamento');
+    const closeReg = document.getElementById('close-reglamento');
+    const btnVerReg = document.getElementById('btn-ver-reglamento');
+    const successBox = document.getElementById('success');
+    const aceptoPolitica = document.getElementById('acepto-politica');
+    const politicaError = document.getElementById('politica-error');
+    const politicaLink = document.getElementById('politica-link');
+    const toast = document.getElementById('toast');
+    const toastDetails = document.getElementById('toast-details');
+    const container = document.querySelector('.container');
+
+    let currentApartamento = '';
+
+    // Elección de rol
+    document.getElementById('btn-residente').onclick = () => { choice.classList.add('hidden'); regForm.classList.remove('hidden'); };
+    document.getElementById('btn-admin').onclick = () => { choice.classList.add('hidden'); adminLogin.classList.remove('hidden'); };
+
+    // Login Admin
+    adminLogin.addEventListener('submit', e => {
+      e.preventDefault();
+      const user = document.getElementById('admin-user').value.trim();
+      const pass = document.getElementById('admin-pass').value.trim();
+      if (user === 'administrador' && pass === 'Olga_4650') {
+        adminLogin.classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+        container.classList.add('wide');
+      } else {
+        alert('Credenciales incorrectas.');
+      }
+    });
+
+    // Guardar morosos (nube con fallback)
+    document.getElementById('save-morosos').onclick = async () => {
+      const list = document.getElementById('morosos-input').value
+        .split(',').map(s=>s.trim().toUpperCase()).filter(Boolean);
+      const r = await apiPost('saveMorosos', { lista: list });
+      if (r.ok) {
+        alert('Lista de morosos actualizada (compartida).');
+      } else {
+        localStorage.setItem('morosos', JSON.stringify(list));
+        alert('Guardado local por falla remota. Revisa API_URL/permiso GAS.');
+      }
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const choice = document.getElementById('choice');
-      const adminLogin = document.getElementById('admin-login');
-      const adminPanel = document.getElementById('admin-panel');
-      const regForm = document.getElementById('form-registro');
-      const resForm = document.getElementById('form-reserva');
-      const misReservasDiv = document.getElementById('mis-reservas');
-      const misReservasList = document.getElementById('mis-reservas-list');
-      const closeMis = document.getElementById('close-mis-reservas');
-      const reglamentoDiv = document.getElementById('reglamento');
-      const closeReg = document.getElementById('close-reglamento');
-      const btnVerReg = document.getElementById('btn-ver-reglamento');
-      const successBox = document.getElementById('success');
-      const aceptoPolitica = document.getElementById('acepto-politica');
-      const politicaError = document.getElementById('politica-error');
-      const politicaLink = document.getElementById('politica-link');
-      const toast = document.getElementById('toast');
-      const toastDetails = document.getElementById('toast-details');
-      const container = document.querySelector('.container'); // para modo wide admin
+    // Botones admin
+    document.getElementById('view-reservas').onclick = viewAdminReservas;
+    document.getElementById('download-reservas').onclick = downloadReservas;
+    document.getElementById('view-usuarios').onclick = viewAdminUsuarios;
+    document.getElementById('download-usuarios').onclick = downloadUsuarios;
 
-      let currentApartamento = '';
+    // Reglamento
+    btnVerReg.addEventListener('click', () => { resForm.classList.add('hidden'); reglamentoDiv.classList.remove('hidden'); });
+    closeReg.addEventListener('click', () => { reglamentoDiv.classList.add('hidden'); resForm.classList.remove('hidden'); });
 
-      // Elección de rol
-      document.getElementById('btn-residente').onclick = () => { choice.classList.add('hidden'); regForm.classList.remove('hidden'); };
-      document.getElementById('btn-admin').onclick = () => { choice.classList.add('hidden'); adminLogin.classList.remove('hidden'); };
+    // Generar apartamentos
+    document.getElementById('torre').addEventListener('change', function() {
+      const t = this.value;
+      const apt = document.getElementById('apartamento');
+      apt.innerHTML = '<option value="">-- Selecciona apto --</option>';
+      if(!t) return;
+      const max = t==='K' ? 2 : 4;
+      for(let p=1;p<=5;p++){
+        for(let u=1;u<=max;u++){
+          const num = `${t}${p}${String(u).padStart(2,'0')}`;
+          const opt = document.createElement('option');
+          opt.value = num; opt.text = num; apt.appendChild(opt);
+        }
+      }
+    });
 
-      // Login Admin
-      adminLogin.addEventListener('submit', e => {
-        e.preventDefault();
-        const user = document.getElementById('admin-user').value.trim();
-        const pass = document.getElementById('admin-pass').value.trim();
-        if (user === 'administrador' && pass === 'Olga_4650') {
-          adminLogin.classList.add('hidden');
-          adminPanel.classList.remove('hidden');
-          container.classList.add('wide'); // modo ancho en panel admin
+    // Validación
+    function validate(form) {
+      let ok = true;
+      form.querySelectorAll('.field').forEach(div => {
+        const inp = div.querySelector('input,select,textarea');
+        const err = div.querySelector('.error-msg');
+        if (inp && !inp.checkValidity()) {
+          div.classList.add('error'); if (err) err.style.visibility='visible'; ok = false;
         } else {
-          alert('Credenciales incorrectas.');
+          div.classList.remove('error'); if (err) err.style.visibility='hidden';
         }
       });
-
-      // Guardar morosos
-      document.getElementById('save-morosos').onclick = () => {
-        const list = document.getElementById('morosos-input').value.split(',').map(s=>s.trim().toUpperCase()).filter(s=>s);
-        localStorage.setItem('morosos', JSON.stringify(list));
-        alert('Lista de morosos actualizada.');
-      };
-
-      // Eventos admin (ver/descargar)
-      document.getElementById('view-reservas').onclick = viewAdminReservas;
-      document.getElementById('download-reservas').onclick = downloadReservas;
-      document.getElementById('view-usuarios').onclick = viewAdminUsuarios;
-      document.getElementById('download-usuarios').onclick = downloadUsuarios;
-
-      // Mostrar reglamento en reserva
-      btnVerReg.addEventListener('click', () => { resForm.classList.add('hidden'); reglamentoDiv.classList.remove('hidden'); });
-      closeReg.addEventListener('click', () => { reglamentoDiv.classList.add('hidden'); resForm.classList.remove('hidden'); });
-
-      // Generar apartamentos según torre
-      document.getElementById('torre').addEventListener('change', function() {
-        const t = this.value;
-        const apt = document.getElementById('apartamento');
-        apt.innerHTML = '<option value="">-- Selecciona apto --</option>';
-        if(!t) return;
-        const max = t==='K' ? 2 : 4;
-        for(let p=1;p<=5;p++){
-          for(let u=1;u<=max;u++){
-            const num = `${t}${p}${String(u).padStart(2,'0')}`;
-            const opt = document.createElement('option');
-            opt.value = num; opt.text = num; apt.appendChild(opt);
-          }
+      if(form.id === 'form-registro') {
+        if(!aceptoPolitica.checked) {
+          politicaError.style.visibility = 'visible';
+          aceptoPolitica.parentElement.classList.add('error');
+          ok = false;
+        } else {
+          politicaError.style.visibility = 'hidden';
+          aceptoPolitica.parentElement.classList.remove('error');
         }
-      });
+      }
+      return ok;
+    }
 
-      // Validación genérica + política
-      function validate(form) {
-        let ok = true;
-        form.querySelectorAll('.field').forEach(div => {
-          const inp = div.querySelector('input,select,textarea');
-          const err = div.querySelector('.error-msg');
-          if (inp && !inp.checkValidity()) {
-            div.classList.add('error'); if (err) err.style.visibility='visible'; ok = false;
-          } else {
-            div.classList.remove('error'); if (err) err.style.visibility='hidden';
-          }
-        });
+    // Registro Residente (async para usar nube)
+    regForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      if(!validate(regForm)) return;
 
-        if(form.id === 'form-registro') {
-          if(!aceptoPolitica.checked) {
-            politicaError.style.visibility = 'visible';
-            aceptoPolitica.parentElement.classList.add('error');
-            ok = false;
-          } else {
-            politicaError.style.visibility = 'hidden';
-            aceptoPolitica.parentElement.classList.remove('error');
-          }
-        }
-        return ok;
+      const nombre = document.getElementById('nombre').value.trim();
+      const apartamento = document.getElementById('apartamento').value;
+      currentApartamento = apartamento;
+
+      // Invitados máx 2
+      const invitadosInput = document.getElementById('invitados');
+      const invitadosError = document.getElementById('invitados-error');
+      const invitadosRaw = invitadosInput.value.trim();
+      let invitados = '';
+      if (invitadosRaw) {
+        const lista = invitadosRaw.split(',').map(s => s.trim()).filter(Boolean);
+        if (lista.length > 2) { invitadosError.style.visibility = 'visible'; return; }
+        invitadosError.style.visibility = 'hidden';
+        invitados = lista.join(', ');
+      } else {
+        invitadosError.style.visibility = 'hidden';
       }
 
-      // Registro Residente
-      regForm.addEventListener('submit', e => {
-        e.preventDefault();
-        if(!validate(regForm)) return;
+      // Morosos (nube con fallback)
+      let morosos = [];
+      try {
+        const r = await apiGet('getMorosos');
+        morosos = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('morosos') || '[]');
+      } catch {
+        morosos = JSON.parse(localStorage.getItem('morosos') || '[]');
+      }
+      if (morosos.includes(apartamento)) {
+        alert('No puedes reservar: estás en lista de morosos.');
+        return;
+      }
 
-        const nombre = document.getElementById('nombre').value.trim();
-        const apartamento = document.getElementById('apartamento').value;
-        currentApartamento = apartamento;
+      // Contraseña por apto
+      const contraseñaEsperada = contraseñasPorApartamento[apartamento];
+      if (!contraseñaEsperada) { alert('Apartamento sin contraseña registrada. Contacta a la administración.'); return; }
+      const contraseñaIngresada = prompt(`Ingresa la contraseña del apartamento ${apartamento}:`);
+      if (contraseñaIngresada !== contraseñaEsperada) { alert('Contraseña incorrecta. No puedes continuar.'); return; }
 
-        // Invitados máx 2
-        const invitadosInput = document.getElementById('invitados');
-        const invitadosError = document.getElementById('invitados-error');
-        const invitadosRaw = invitadosInput.value.trim();
-        let invitados = '';
-        if (invitadosRaw) {
-          const lista = invitadosRaw.split(',').map(s => s.trim()).filter(Boolean);
-          if (lista.length > 2) {
-            invitadosError.style.visibility = 'visible';
-            return;
-          }
-          invitadosError.style.visibility = 'hidden';
-          invitados = lista.join(', ');
-        } else {
-          invitadosError.style.visibility = 'hidden';
-        }
-
-        // Morosos
-        const morosos = JSON.parse(localStorage.getItem('morosos') || '[]');
-        if (morosos.includes(apartamento)) {
-          alert('No puedes reservar: estás en lista de morosos.');
-          return;
-        }
-
-        // Contraseña por apartamento
-        const contraseñaEsperada = contraseñasPorApartamento[apartamento];
-        if (!contraseñaEsperada) {
-          alert('Apartamento no tiene contraseña registrada. Contacta a la administración.');
-          return;
-        }
-        const contraseñaIngresada = prompt(`Ingresa la contraseña del apartamento ${apartamento}:`);
-        if (contraseñaIngresada !== contraseñaEsperada) {
-          alert('Contraseña incorrecta. No puedes continuar.');
-          return;
-        }
-
-        // ===== Registrar/actualizar lista de usuarios (independiente de reservas) =====
+      // Guardar/actualizar usuario (nube con espejo local si falla)
+      const payloadUser = { nombre, apartamento, invitados, registroAt: new Date().toISOString() };
+      const saveU = await apiPost('saveUser', payloadUser);
+      if (!saveU.ok) {
         let usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
         const idx = usuarios.findIndex(u => u.apartamento === apartamento);
-        if (idx >= 0) {
-          usuarios[idx] = { ...usuarios[idx], nombre, invitados, registroAt: usuarios[idx].registroAt || new Date().toISOString() };
-        } else {
-          usuarios.push({ nombre, apartamento, invitados, registroAt: new Date().toISOString() });
-        }
+        if (idx >= 0) usuarios[idx] = {...usuarios[idx], nombre, invitados, registroAt: usuarios[idx].registroAt || payloadUser.registroAt};
+        else usuarios.push(payloadUser);
         localStorage.setItem('usuarios', JSON.stringify(usuarios));
-        // ==============================================================================
+        console.warn('saveUser remoto falló, guardado local.');
+      }
 
-        // Guardar datos base de la reserva en curso
-        localStorage.setItem('currentReserva', JSON.stringify({ nombre, apartamento, invitados, fecha:'', hora:'' }));
+      // Guardar datos base de la reserva en curso (cliente)
+      localStorage.setItem('currentReserva', JSON.stringify({ nombre, apartamento, invitados, fecha:'', hora:'' }));
 
-        // UI: pasar a reserva y mostrar historial
-        regForm.classList.add('hidden');
-        showMisReservas(apartamento);
-        resForm.classList.remove('hidden');
-      });
+      // UI: pasar a reserva y mostrar historial desde nube
+      regForm.classList.add('hidden');
+      await showMisReservas(apartamento);
+      resForm.classList.remove('hidden');
+    });
 
-      // Política de datos
-      politicaLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        alert(
-`POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES
+    // Política de datos
+    politicaLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert(`POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES
 
 Conforme a la Ley 1581 de 2012 y el Decreto 1377 de 2013 de Colombia, la copropiedad informa que los datos personales recolectados serán utilizados exclusivamente para:
-
 1. Gestión de reservas y acceso a zonas comunes
 2. Comunicación con residentes
 3. Cumplimiento de obligaciones legales
 
-Los datos no serán compartidos con terceros sin autorización previa. Puede ejercer sus derechos de acceso, corrección, actualización o supresión contactando a la administración.`
-        );
-      });
+Los datos no serán compartidos con terceros sin autorización previa. Puede ejercer sus derechos de acceso, corrección, actualización o supresión contactando a la administración.`);
+    });
 
-      // Mostrar mis reservas del apto
-      function showMisReservas(apto) {
-        const all = JSON.parse(localStorage.getItem('reservas') || '[]');
-        const filt = all.filter(r => r.apartamento === apto);
-        if (!filt.length) {
-          misReservasList.innerHTML = '<p>No tienes reservas previas.</p>';
-        } else {
-          let html = '<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
-          filt.forEach(r => { html += `<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`; });
-          html += '</tbody></table>';
-          misReservasList.innerHTML = html;
-        }
-        misReservasDiv.classList.remove('hidden');
+    // Mis Reservas (desde nube con fallback)
+    async function showMisReservas(apto) {
+      let all = [];
+      try {
+        const r = await apiGet('listReservas');
+        all = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('reservas') || '[]');
+      } catch {
+        all = JSON.parse(localStorage.getItem('reservas') || '[]');
       }
-      closeMis.addEventListener('click', () => misReservasDiv.classList.add('hidden'));
+      const filt = all.filter(r => r.apartamento === apto);
+      if (!filt.length) {
+        misReservasList.innerHTML = '<p>No tienes reservas previas.</p>';
+      } else {
+        let html = '<table><thead><tr><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+        filt.forEach(r => { html += `<tr><td>${r.fecha}</td><td>${r.hora}</td></tr>`; });
+        html += '</tbody></table>';
+        misReservasList.innerHTML = html;
+      }
+      misReservasDiv.classList.remove('hidden');
+    }
+    closeMis.addEventListener('click', () => misReservasDiv.classList.add('hidden'));
 
-      // Reserva Piscina
-      resForm.addEventListener('submit', e => {
-        e.preventDefault();
-        if(!validate(resForm)) return;
+    // Reserva Piscina (nube con fallback)
+    resForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      if(!validate(resForm)) return;
 
-        const reserva = JSON.parse(localStorage.getItem('currentReserva') || '{}');
-        reserva.fecha = document.getElementById('fecha').value;
-        reserva.hora  = document.getElementById('hora').value;
+      const reservaBase = JSON.parse(localStorage.getItem('currentReserva') || '{}');
+      const reserva = {
+        ...reservaBase,
+        fecha: document.getElementById('fecha').value,
+        hora:  document.getElementById('hora').value
+      };
 
-        // No permitir duplicados mismo apto/fecha/hora
-        const reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
-        const yaExiste = reservas.some(r => r.apartamento === reserva.apartamento && r.fecha === reserva.fecha && r.hora === reserva.hora);
-        if (yaExiste) {
-          alert('Ya existe una reserva para este apartamento en esa fecha y hora.');
-          return;
-        }
+      // Evitar duplicado consultando nube (fallback local)
+      let reservas = [];
+      try {
+        const lr = await apiGet('listReservas');
+        reservas = lr.ok ? (lr.data || []) : JSON.parse(localStorage.getItem('reservas') || '[]');
+      } catch {
+        reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
+      }
+      const yaExiste = reservas.some(r => r.apartamento === reserva.apartamento && r.fecha === reserva.fecha && r.hora === reserva.hora);
+      if (yaExiste) { alert('Ya existe una reserva para este apartamento en esa fecha y hora.'); return; }
 
+      // Guardar en nube (si falla, espejo local)
+      const r = await apiPost('saveReserva', reserva);
+      if (!r.ok) {
         reservas.push(reserva);
         localStorage.setItem('reservas', JSON.stringify(reservas));
+        console.warn('saveReserva remoto falló; guardado local temporal.');
+      }
 
-        // Banner arriba (corregido: un solo texto)
-        successBox.textContent = `LA RESERVA SE COMPLETÓ DE MANERA SATISFACTORIA · RECUERDE TENER ROPA DE LICRA Y GORRO DE PISCINA`;
-        successBox.style.display = 'block';
+      successBox.textContent = `LA RESERVA SE COMPLETÓ DE MANERA SATISFACTORIA · RECUERDE TENER ROPA DE LICRA Y GORRO DE PISCINA`;
+      successBox.style.display = 'block';
+      toastDetails.textContent = `${reserva.nombre} · Apto ${reserva.apartamento} · ${reserva.fecha} · ${reserva.hora}`;
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); location.reload(); }, 3500);
+    });
 
-        // Toast con detalles
-        toastDetails.textContent = `${reserva.nombre} · Apto ${reserva.apartamento} · ${reserva.fecha} · ${reserva.hora}`;
-        toast.classList.add('show');
+    // Admin: ver reservas (nube con fallback)
+    async function viewAdminReservas() {
+      const c = document.getElementById('reservas-list');
+      document.getElementById('usuarios-list').classList.add('hidden');
 
-        // Reiniciar al cabo de unos segundos
-        setTimeout(() => { toast.classList.remove('show'); location.reload(); }, 3500);
+      let reservas = [];
+      try {
+        const r = await apiGet('listReservas');
+        reservas = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('reservas') || '[]');
+      } catch {
+        reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
+      }
+
+      if (!reservas.length) {
+        c.innerHTML = '<p>No hay reservas.</p>';
+      } else {
+        let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
+        reservas.forEach(r => {
+          html += `<tr><td>${r.nombre || ''}</td><td>${r.apartamento}</td><td>${r.invitados || ''}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        c.innerHTML = html;
+      }
+      c.classList.remove('hidden');
+    }
+
+    // Admin: ver usuarios (nube con fallback)
+    async function viewAdminUsuarios() {
+      const c = document.getElementById('usuarios-list');
+      document.getElementById('reservas-list').classList.add('hidden');
+
+      let usuarios = [];
+      try {
+        const r = await apiGet('listUsuarios');
+        usuarios = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('usuarios') || '[]');
+      } catch {
+        usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+      }
+
+      if (!usuarios.length) {
+        c.innerHTML = '<p>No hay usuarios registrados.</p>';
+      } else {
+        let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Registrado</th></tr></thead><tbody>';
+        usuarios.forEach(u => {
+          const fecha = u.registroAt ? new Date(u.registroAt).toLocaleString() : '';
+          html += `<tr><td>${u.nombre || ''}</td><td>${u.apartamento}</td><td>${u.invitados || ''}</td><td>${fecha}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        c.innerHTML = html;
+      }
+      c.classList.remove('hidden');
+    }
+
+    // Descargas CSV (sobre datos actuales obtenidos)
+    async function downloadReservas() {
+      let reservas = [];
+      try {
+        const r = await apiGet('listReservas');
+        reservas = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('reservas') || '[]');
+      } catch {
+        reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
+      }
+      if (!reservas.length) { alert('No hay reservas para descargar.'); return; }
+
+      const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      let csv = 'Nombre,Apto,Invitados,Fecha,Hora\r\n';
+      reservas.forEach(r => {
+        const inv = r.invitados ? r.invitados.replace(/,/g, ';') : '';
+        csv += [esc(r.nombre || ''), esc(r.apartamento), esc(inv), esc(r.fecha), esc(r.hora)].join(',') + '\r\n';
       });
 
-      // Admin: ver reservas
-      function viewAdminReservas() {
-        const reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
-        const c = document.getElementById('reservas-list');
-        // Oculta usuarios si estuvieran abiertos
-        document.getElementById('usuarios-list').classList.add('hidden');
+      const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'reservas_piscina.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
 
-        if (!reservas.length) {
-          c.innerHTML = '<p>No hay reservas.</p>';
-        } else {
-          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Fecha</th><th>Hora</th></tr></thead><tbody>';
-          reservas.forEach(r => {
-            html += `<tr><td>${r.nombre || ''}</td><td>${r.apartamento}</td><td>${r.invitados || ''}</td><td>${r.fecha}</td><td>${r.hora}</td></tr>`;
-          });
-          html += '</tbody></table>';
-          c.innerHTML = html;
-        }
-        c.classList.remove('hidden');
+    async function downloadUsuarios() {
+      let usuarios = [];
+      try {
+        const r = await apiGet('listUsuarios');
+        usuarios = r.ok ? (r.data || []) : JSON.parse(localStorage.getItem('usuarios') || '[]');
+      } catch {
+        usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
       }
+      if (!usuarios.length) { alert('No hay usuarios para descargar.'); return; }
 
-      // Admin: ver usuarios
-      function viewAdminUsuarios() {
-        const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-        const c = document.getElementById('usuarios-list');
-        // Oculta reservas si estuvieran abiertas
-        document.getElementById('reservas-list').classList.add('hidden');
+      const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      let csv = 'Nombre,Apto,Invitados,Registrado\r\n';
+      usuarios.forEach(u => {
+        const inv = u.invitados ? u.invitados.replace(/,/g, ';') : '';
+        const fecha = u.registroAt ? new Date(u.registroAt).toISOString() : '';
+        csv += [esc(u.nombre || ''), esc(u.apartamento), esc(inv), esc(fecha)].join(',') + '\r\n';
+      });
 
-        if (!usuarios.length) {
-          c.innerHTML = '<p>No hay usuarios registrados.</p>';
-        } else {
-          let html = '<table><thead><tr><th>Nombre</th><th>Apto</th><th>Invitados</th><th>Registrado</th></tr></thead><tbody>';
-          usuarios.forEach(u => {
-            const fecha = u.registroAt ? new Date(u.registroAt).toLocaleString() : '';
-            html += `<tr><td>${u.nombre || ''}</td><td>${u.apartamento}</td><td>${u.invitados || ''}</td><td>${fecha}</td></tr>`;
-          });
-          html += '</tbody></table>';
-          c.innerHTML = html;
-        }
-        c.classList.remove('hidden');
-      }
-
-      // Admin: descargar CSV reservas (robusto)
-      function downloadReservas() {
-        const reservas = JSON.parse(localStorage.getItem('reservas') || '[]');
-        if (!reservas.length) { alert('No hay reservas para descargar.'); return; }
-
-        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`; // CSV escape
-        let csv = 'Nombre,Apto,Invitados,Fecha,Hora\r\n';
-        reservas.forEach(r => {
-          const inv = r.invitados ? r.invitados.replace(/,/g, ';') : '';
-          csv += [esc(r.nombre || ''), esc(r.apartamento), esc(inv), esc(r.fecha), esc(r.hora)].join(',') + '\r\n';
-        });
-
-        const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'reservas_piscina.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-
-      // Admin: descargar CSV usuarios (nuevo)
-      function downloadUsuarios() {
-        const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-        if (!usuarios.length) { alert('No hay usuarios para descargar.'); return; }
-
-        const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-        let csv = 'Nombre,Apto,Invitados,Registrado\r\n';
-        usuarios.forEach(u => {
-          const inv = u.invitados ? u.invitados.replace(/,/g, ';') : '';
-          const fecha = u.registroAt ? new Date(u.registroAt).toISOString() : '';
-          csv += [esc(u.nombre || ''), esc(u.apartamento), esc(inv), esc(fecha)].join(',') + '\r\n';
-        });
-
-        const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'usuarios_registrados.csv';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    });
+      const blob = new Blob([new Uint8Array([0xEF,0xBB,0xBF]), csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'usuarios_registrados.csv';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+  });
   </script>
 </body>
 </html>
