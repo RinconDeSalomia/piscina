@@ -226,6 +226,30 @@
   </div>
 
   <script>
+  // ================== CONFIG REMOTA ==================
+  // 👇 ESTA ES LA URL QUE TE DA GOOGLE APP SCRIPT (termina en /exec)
+  const API_URL = "https://script.google.com/macros/s/AKfycbyPiF9-5-j61_CMLC_jkrbmKID_PhyLFTvNSK5tFtcMJ_vVY2rts1taWhDSWah10JxJ/exec";
+  const SECRET  = "RINCONDESALOMIA4650"; // tu secreto
+
+  async function apiPost(action, payload={}) {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({secret: SECRET, action, payload})
+      });
+      return await res.json();
+    } catch (e) { return {ok:false, error:String(e)}; }
+  }
+
+  async function apiGet(action) {
+    try {
+      const url = `${API_URL}?action=${encodeURIComponent(action)}`;
+      const res = await fetch(url, { method: 'GET' });
+      return await res.json();
+    } catch (e) { return {ok:false, error:String(e)}; }
+  }
+
     const contraseñasPorApartamento = {
       "A101":"1543","A102":"1361","A103":"1294","A104":"1538","A201":"1745","A202":"1649","A203":"1296","A204":"1156","A301":"1180","A302":"1760","A303":"1638","A304":"1813","A401":"1488","A402":"1813","A403":"1473","A404":"1247","A501":"1947","A502":"1504","A503":"1648","A504":"1257",
       "B101":"1458","B102":"1940","B103":"1896","B104":"1836","B201":"1828","B202":"1506","B203":"1633","B204":"1168","B301":"1890","B302":"1650","B303":"1439","B304":"1927","B401":"1559","B402":"1957","B403":"1864","B404":"1050","B501":"1025","B502":"1837","B503":"1111","B504":"1000",
