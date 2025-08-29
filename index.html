@@ -219,23 +219,37 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbx5kqRo2q8qn5duPNPFMeUODs2Qg4A98MlJf9-j36JBdRWrDq3YYU_3NYmwz_tdl0Ku/exec"; // <-- reemplaza por tu /exec real
   const SECRET  = "RINCONDESALOMIA4650";
 
-  async function apiPost(action, payload={}) {
+  async function apiPost(action, payload = {}) {
     try {
+      // Enviar JSON como TEXTO para evitar preflight CORS
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({secret: SECRET, action, payload})
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ secret: SECRET, action, payload })
       });
-      return await res.json();
-    } catch (e) { return {ok:false, error:String(e)}; }
+      const json = await res.json();
+      if (!json.ok) console.error('apiPost error', action, json);
+      return json;
+    } catch (e) {
+      console.error('apiPost catch', action, e);
+      return { ok: false, error: String(e) };
+    }
   }
+  
   async function apiGet(action) {
     try {
-      const url = `${API_URL}?action=${encodeURIComponent(action)}`;
+      // cache-buster para que no se quede en caché
+      const url = `${API_URL}?action=${encodeURIComponent(action)}&t=${Date.now()}`;
       const res = await fetch(url, { method: 'GET' });
-      return await res.json();
-    } catch (e) { return {ok:false, error:String(e)}; }
+      const json = await res.json();
+      if (!json.ok) console.error('apiGet error', action, json);
+      return json;
+    } catch (e) {
+      console.error('apiGet catch', action, e);
+      return { ok: false, error: String(e) };
+    }
   }
+
 
   // ================== APP ==================
   const contraseñasPorApartamento = {
